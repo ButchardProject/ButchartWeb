@@ -1,29 +1,37 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+      <router-view/>
   </div>
 </template>
-
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
+<script>
+export default {
+  name: 'app',
+  mounted () {
+    /** 初始化，规定字体rem
+     *  计算方法：尺寸/40
+     *  单位：rem
+     */
+    (function (doc, win) {
+      var docEl = doc.documentElement
+      var resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize'
+      var recalc = function () {
+        var clientWidth = Math.max(docEl.clientWidth, window.innerWidth || 0)
+        if (!clientWidth) return
+        if (clientWidth > 640) { clientWidth = 640 }
+        docEl.style.fontSize = 40 * (clientWidth / 640) + 'px'
+      }
+      win.addEventListener(resizeEvt, recalc, false)
+      doc.addEventListener('DOMContentLoaded', recalc, false)
+    })(document, window)
   }
+}
+</script>
+
+<style lang="css">
+@import '../src/assets/css/reset.css';
+
+html,body, #app {
+  height: 100%;
+  width: 100%;
 }
 </style>
