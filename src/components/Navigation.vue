@@ -23,7 +23,7 @@
         <span class="info">
           <img class="personal" v-bind:src="myself" @click="go()"/>
           <img class="car" v-bind:src="car"/>
-          <span class="number">{{carNumber}}</span>
+          <span class="number" @click="to()">{{badge}}</span>
         </span>
     </div>
 </template>
@@ -39,11 +39,11 @@ export default {
       myself: config.myself, // 个人中心
       car: config.car, // 购物车
       content: this.$store.state.seriesName, // 系列内容
-      carNumber: 0, // 购物车数量
       isActive: false, // 是否需要渲染flag
       current: '', // 当前选中的li元素
       title: '', // 当前title显示信息
-      flag: false // 存储当前title信息
+      flag: false, // 存储当前title信息
+      selected: '2', // 传递到allorder的值
     }
   },
   // 在vue创建之前先获取
@@ -60,27 +60,52 @@ export default {
     // 显示当前花园系列
     option () {
       this.isActive = !this.isActive
+      this.$store.dispatch('toggleSideabar')
     },
     // 隐藏遮罩
     hidden (e) {
       if (!e.target.classList.contains('isStatic active')) {
         this.isActive = false
+        this.$store.dispatch('toggleSideabar')
       }
     },
     // 选择titie路由到相应的页面
     select (item, index) {
-      switch (index) {
-        case 0 :
-          this.title = item
-          this.$router.push({ name: 'common', params: { id: index } })
-      }
+      this.$router.push({ name: 'common', query: { id: index } })
     },
     // 前往个人中心
     go () {
-      if (this.$store.state.user.phone === '' || sessionStorage.getItem('phone') === null) {
-        this.$router.push('Login')
+      console.log('store', this.$store.state.user.phone)
+      console.log('local', sessionStorage.getItem('phone'))
+      if (this.$store.state.user.phone === '' && sessionStorage.getItem('phone') === null) {
+        this.$router.push('login')
       } else {
-        this.$router.push('Manager')
+        this.$router.push('manager')
+      }
+    },
+    // 前往购物未读
+    to () {
+      if (this.$store.state.user.phone === '' && sessionStorage.getItem('phone') === null) {
+        this.$router.push('login')
+      } else {
+        this.$router.push({
+          name:'allorder',
+          query: {
+            selected: this.selected
+          }
+        })
+      }
+    }
+  },
+  computed: {
+    badge: function () {
+      if (this.$store.state.unread) {
+        return this.$store.state.unread
+      }
+      if (sessionStorage.getItem('unread')) {
+        return parseInt(sessionStorage.getItem('unread'))
+      } else {
+        return 0
       }
     }
   }
@@ -140,7 +165,7 @@ export default {
     border-radius: 25px;
     line-height: 14px;
     display: inline-block;
-    width: 0.5rem;
+    width: 0.7rem;
     color: #FFFFFF;
     font-size: 0.3rem;
     text-align: center;
@@ -169,5 +194,6 @@ export default {
     top: 1.8rem;
     background: rgba(0,0,0,.7);
     z-index:999;
+    transition: all .2s;
   }
 </style>

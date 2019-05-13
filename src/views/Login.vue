@@ -83,8 +83,8 @@ export default {
           .then(function (res) {
             console.log(res)
             if (res.status === 200) {
-              localStorage.setItem('phone', self.phone)
-              localStorage.setItem('code', self.code)
+              sessionStorage.setItem('phone', self.phone)
+              sessionStorage.setItem('code', self.code)
               self.$store.dispatch('setUser', self.phone)
               self.$router.push('/')
             }

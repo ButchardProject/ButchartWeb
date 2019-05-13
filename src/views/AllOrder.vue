@@ -11,7 +11,10 @@
     <!-- tab-container -->
     <mt-tab-container v-model="selected">
       <mt-tab-container-item id="1">
-        xxxxx
+        <WaitPay/>
+        <WaitDelivery/>
+        <WaitReceive/>
+        <Completed/>
       </mt-tab-container-item>
       <!-- 待付款 -->
       <mt-tab-container-item id="2">
@@ -50,8 +53,12 @@ export default {
   },
   data () {
     return {
-      selected: '3'
+      selected: '1'
     }
+  },
+  // 在vue加载完之后，去获取传过来的选中值
+  mounted () {
+    this.selected = this.$route.query.selected
   }
 }
 </script>
@@ -61,6 +68,10 @@ export default {
   width: 100%;
   background: #F0F0F0;
   font-size: 0.6rem;
+}
+.tabbar {
+  background: #F0F0F0;
+  padding-bottom: 5%;
 }
 /* 修改tabbar的字体和颜色 */
 .mint-navbar .mint-tab-item.is-selected {

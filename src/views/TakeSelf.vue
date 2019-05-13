@@ -1,0 +1,217 @@
+<template>
+<div class="takeself-body">
+    <div class="takeself-content">
+      <div class="store-lists">
+        <div class="title">门店选择</div>
+        <ul>
+            <li v-for="(item,index) in num" v-bind:key="index" @click="select(item,index)" :class="[current === index ? 'active' : '']">
+                > {{storeName[index]}}
+            </li>
+            <mt-popup v-model="visible" popup-transition="popup-fade" class="popup">
+                <div class="storeInfo">
+                    <div>
+                      <span class="title">店铺名称: </span>
+                      <span class="info">{{storeName[flag]}}</span>
+                    </div>
+                    <div>
+                      <span class="title">店铺地址: </span>
+                      <span class="info">{{storeAddress[flag]}}</span>
+                    </div>
+                    <div>
+                      <span class="title">店铺电话: </span>
+                      <span class="info">{{storeTel[flag]}}</span>
+                    </div>
+                    <div>
+                      <span class="title">营业状态: </span>
+                      <span class="info">{{storeStatus[flag]}}</span>
+                    </div>
+                    <div>
+                        <span class="confirm" @click="confirm()">确认</span>
+                    </div>
+                </div>
+            </mt-popup>
+        </ul>
+      </div>
+      <hr/>
+      <div class="store-time">
+        <div class="title">时间选择</div>
+        <span @click="chooseDate()">日期 {{date}}</span>
+        <mt-datetime-picker type="date" ref="datePicker" @confirm="handleDateConfirm"
+            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日">
+            </mt-datetime-picker>
+        <span @click="chooseTime()">时间 {{time}}</span>
+        <mt-datetime-picker ref="timePicker" type="time" @confirm="handleTimeConfirm">
+        </mt-datetime-picker>
+      </div>
+    </div>
+    <!-- 保存 -->
+    <div class="div-save">
+        <span class="save" @click="save()">保存</span>
+    </div>
+</div>
+</template>
+<script>
+import { DatetimePicker , Popup, MessageBox } from 'mint-ui'
+export default {
+  name: 'takeself',
+  data () {
+    return {
+      date: '', // 日期
+      time: '', // 时间
+      storeName: this.$store.state.storeLists.storeName, // 店铺名称
+      storeAddress: this.$store.state.storeLists.storeAddress, // 店铺地址
+      storeTel: this.$store.state.storeLists.storeTel, // 店铺号码
+      storeStatus: this.$store.state.storeLists.storeStatus, // 店铺状态
+      visible: false, // popup的显示
+      flag: '', // 用来展示哪个地址
+      current: '' // 当前选中的门店
+    }
+  },
+  methods: {
+    // 打开datetime组件
+    chooseDate () {
+      this.$refs.datePicker.open()
+    },
+    chooseTime () {
+      this.$refs.timePicker.open()
+    },
+    // 获取日期
+    handleDateConfirm (data) {
+      this.date = this.getDate(data)
+    },
+    // 获取时间
+    handleTimeConfirm (data) {
+      this.time = data
+    },
+    // 处理日期
+    getDate (date) {
+      var nowYear = date.getFullYear()
+      var nowMonth = date.getMonth() + 1 // 注意getMonth从0开始，getDay()也是(此时0代表星期日)
+      var nowDay = date.getDate()
+      var str = nowYear + '年' + nowMonth + '月' + nowDay + '日'
+      return str
+    },
+    // 点击出现popup
+    select (item, index) {
+      this.visible = true // popup显示
+      this.flag = index // 把当前index传递给flag
+    },
+    // 确认当前门店
+    confirm () {
+      this.visible = false // 先把popup关掉
+      this.current = this.flag // 确认了当前哪个门店
+    },
+    // 保存当前门店自取的信息
+    save () {
+      // 对当前选中的门店进行判断，如果没有选择门店就提示
+      if (!(this.current)) {
+        MessageBox('提示', '您还未选择门店地址');
+      }
+      // 对当前自取时间进行判断
+      if (!(this.date && this.time)) {
+        MessageBox('提示', '您还未选择自取时间');
+      }
+      // 把当前选择的信息封装起来，并保存
+      let storeInfo = {
+        'storeName': this.storeName[this.current],
+        'dateTime':  this.date + this.time 
+        }
+      // 存下vuex中以及sessionStorage中
+      this.$store.dispatch('saveStore', JSON.stringify(storeInfo))
+      sessionStorage.setItem('storeInfo',JSON.stringify(storeInfo))
+      sessionStorage.setItem('isSelf',true)
+      // 判断之后返回上一层
+      if ((this.current) && (this.date) && (this.time)) {
+        this.$router.go(-1);
+      }
+    }
+  },
+  // vue加载完之后开始获取地址
+  mounted () {
+    this.$store.dispatch('getStoreLists')
+  },
+  // 计算当前店铺数量
+  computed: {
+    num: function () {
+      return this.$store.state.storeLists.storeNum
+    }
+  }
+}
+</script>
+<style lang="css" scoped>
+/* 整个body */
+.takeself-body {
+    width: 100%;
+    height: 100%;
+    background-color: #F0F0F0;
+}
+/* 内部content */
+.takeself-content {
+    width: 100%;
+    height: 50%;
+    background-color: #FFFFFF;
+    position: relative;
+    top: 5%;
+}
+li {
+    padding-left: 10%;
+    line-height: 20px;
+    font-size: 15px;
+}
+/* 门店选择与时间选择 */
+.title {
+    font-size: 16px;
+    line-height: 30px;
+    padding: 2% 5%;
+}
+/* 日期，时间的样式 */
+.store-time > span {
+    font-size: 14px;
+    color: #BDBDBD;
+    display: inline-block;
+    width: 40%;
+    margin-left:10%;
+}
+/* popup中的 */
+.storeInfo {
+    margin: 0% 5%;
+}
+.popup {
+    width: 80%;
+    font-size: 14px;
+    line-height: 40px;
+}
+/* 确认按钮 */
+.confirm {
+    background: #63B8FF;
+    display: inline-block;
+    width: 100%;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 15px;
+}
+/* 选中之后添加样式 */
+.active {
+    color: #D1EEEE;
+}
+.div-save {
+    height: 6%;
+    width: 100%;
+    background-color: #F8F8FF;
+    position: fixed;
+    bottom: 0;
+    line-height:35px;
+    text-align: center;
+}
+.save {
+    border: 1px solid #63B8FF;
+    background-color: #63B8FF;
+    color: #FFFFFF;
+    display: inline-block;
+    width: 96%;
+    text-align: center;
+    border-radius: 10px;
+    letter-spacing: 20px;
+    font-size: 16px;
+}
+</style>

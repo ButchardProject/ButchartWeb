@@ -30,6 +30,9 @@ export default {
         if (value.length > 10) {
           MessageBox.alert('长度不能超过10个字').then(action => {
           })
+        } else {
+          MessageBox.alert('修改成功')
+          console.log(value)
         }
       })
     },

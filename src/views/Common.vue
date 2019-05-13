@@ -28,29 +28,50 @@ export default {
       name: this.$store.state.product.productName, // 花名
       price: this.$store.state.product.productPrice, // 价格
       desc: this.$store.state.product.productDesc, // 花描述
-      // num: this.$store.state.product.productNum, // 数量
-      index: this.$route.params.id // 当前第几个index
+      index: this.$route.query.id, // 当前第几个index
+      productId: this.$store.state.product.productId // 当前productId
     }
   },
-  created () {
+  // 在vue加载完之后在去请求
+  mounted () {
     this.getProduct(this.index)
   },
   methods: {
+    // 通过当前的选取的id来请求服务器，获取相应的系列
     getProduct (index) {
-      // 如果不是空的才请求
-      if (index != null) {
-        this.$store.dispatch('getProductBySeries', index)
-      }
+      this.$store.dispatch('getProductBySeries', index)
     },
     // 随便选个先路由过去
     select (index) {
-      this.$router.push({ name: 'buy', params: { index: index } })
+      // 路由携带当前序号
+      this.$router.push(
+        {
+          name: 'buy',
+          query: {
+            index: index
+          }
+        })
+      // 把当前花的名称，价格以及描述存到sessionStorage里面
+      sessionStorage.setItem('name', (this.name)[index])
+      sessionStorage.setItem('price', (this.price)[index])
+      sessionStorage.setItem('desc', (this.desc)[index])
+      sessionStorage.setItem('index', index)
+      sessionStorage.setItem('productId', (this.productId)[index])
     }
   },
   computed: {
     // 获取num的数量，data里面获取不到？
     num: function () {
       return this.$store.state.product.productNum
+    }
+  },
+  // 监听$route的路由信息，进行数据转换
+  watch: {
+    '$route': {
+      handler (val) {
+        this.index = val.query.id // 获取当前路由更新的id
+        this.getProduct(this.index) // 重新获取当前数据
+      }
     }
   }
 }

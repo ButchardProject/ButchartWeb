@@ -29,7 +29,7 @@ export default {
 
 <style lang="css">
 @import '../src/assets/css/reset.css';
-
+@import '../src/assets/css/common.css';
 html,body, #app {
   height: 100%;
   width: 100%;

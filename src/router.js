@@ -78,6 +78,22 @@ export default new Router({
       component: () => import(/* webpackChunkName: "confirmorder" */ './views/ConfirmOrder.vue')
     },
     {
+      path: '/takeself',
+      name: 'takeself',
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import(/* webpackChunkName: "takeself" */ './views/TakeSelf.vue')
+    },
+    {
+      path: '/express',
+      name: 'express',
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import(/* webpackChunkName: "takeself" */ './views/Express.vue')
+    },
+    {
       path: '/allorder',
       name: 'allorder',
       // route level code-splitting

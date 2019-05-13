@@ -7,21 +7,21 @@
       <span @click="setting()">设置&nbsp;&nbsp;></span>
     </div>
     <div class="order-info">
-      <p class="myOrder">我的订单</p><hr>
+      <p class="myOrder" @click="link('1')">我的订单</p><hr>
       <div class="option">
-        <span class="option-span">
+        <span class="option-span" @click="link('2')">
           <img class="option-image" src="../assets/logo/pending-payment.png"/>
           <span>待付款</span>
         </span>
-        <span class="option-span">
+        <span class="option-span" @click="link('3')">
           <img class="option-image" src="../assets/logo/pending-send.png"/>
           <span>待发货</span>
         </span>
-        <span class="option-span">
+        <span class="option-span" @click="link('4')">
           <img class="option-image" src="../assets/logo/pending-receive.png"/>
           <span>待收货</span>
         </span>
-        <span class="option-span">
+        <span class="option-span" @click="link('5')">
           <img class="option-image" src="../assets/logo/finish.png"/>
           <span>已完成</span>
         </span>
@@ -45,7 +45,7 @@ export default {
   name: 'manager',
   data () {
     return {
-      name: '嚯嚯嚯嚯' // 用户昵称
+      name: sessionStorage.getItem('phone') // 用户昵称
     }
   },
   methods: {
@@ -53,8 +53,18 @@ export default {
     home () {
       this.$router.push('/')
     },
+    // 个人设置
     setting () {
       this.$router.push('personal')
+    },
+    // 前往订单页
+    link (number) {
+      this.$router.push({
+        path:'allorder',
+        query: {
+          selected: number
+        }
+      })
     }
   }
 }
@@ -88,9 +98,9 @@ export default {
   .title > span{
     font-size: 0.6rem;
     color: #FFFFFF;
-    margin:0 0 10% 10%;
+    margin:0 0 10% 8%;
     display: inline-block;
-    width: 15%;
+    width: 25%;
     word-wrap: break-word;
     word-break: break-all;
     overflow: hidden;

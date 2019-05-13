@@ -1,0 +1,14 @@
+/* 公共覆盖样式 */
+
+/* swiper 样式覆盖 */
+.div-swiper {
+    position: relative;
+}
+/* 当前swiper打开 */
+.div-swiper-open {
+    z-index: -1;
+}
+/* 当前swiper关闭 */
+.div-swiper-close {
+    z-index: 1;
+}

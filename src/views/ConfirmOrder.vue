@@ -1,8 +1,8 @@
 <template>
 <div class="confirm-order-body">
     <div class="header">
-      <span class="shop-yourself">到店自取</span>
-      <span class="express-delivery">快递配送</span>
+      <span class="shop-yourself" @click="takeSelf()" :class="{self: isSelf}">到店自取</span>
+      <span class="express-delivery" @click="express()">快递配送</span>
     </div>
     <!-- 号码行 -->
     <div class="phone-info">
@@ -19,23 +19,27 @@
     <div class="div-order">
       <div class="order-info">
         <img src="../assets/images/list01.png"/>
-        <span class="info-name">【{{nick}}】</span>
+        <span class="info-name">【{{name}}】</span>
         <span class="info-number">x{{value}}</span>
         <span class="info-price">¥{{price}}</span>
       </div>
       <hr>
       <!-- 数量 -->
-      <div class="div-number">
-        <span class="buy-number">购买数量</span>
-        <span class="calculator">
-            <span class="add-remove left">-</span>
-            <input id="number" v-model="value" disabled/>
-            <span class="add-remove right">+</span>
-        </span>
+      <div class="div-people">
+        <span class="people">花艺师</span>
+        <div class="select">
+          <select>
+            <option value='' disabled selected>默认</option>
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="opel">Opel</option>
+          </select>
+        </div>
       </div>
       <div class="div-mode-discount">
           <span class="mode-discount-name">配送方式</span>
-          <span class="mode-discount-common">></span>
+          <span class="mode-discount-common" v-if="!isSelf">></span>
+          <span class="mode-discount-common" v-else>到店自取</span>
       </div>
       <div class="div-mode-discount">
           <span class="mode-discount-name">店铺优惠</span>
@@ -44,7 +48,7 @@
       <hr>
       <div class="div-text">
         <span>买家留言：</span>
-        <textarea type="text" placeholder="是否需要卡片，卡片内容等（限制30个字）" rows="3" cols="40" maxlength="30"></textarea> 
+        <textarea type="text" placeholder="是否需要卡片，卡片内容等（限制30个字）" rows="3" cols="40" maxlength="30"></textarea>
       </div>
       <div class="div-sum">共<span>{{value}}</span>件商品&nbsp;&nbsp;共计:<span>{{value * price}}</span>元</div>
     </div>
@@ -55,29 +59,81 @@
 </div>
 </template>
 <script>
+import config from '@/config'
+import axios from 'axios'
 export default {
   name: 'confirmorder',
   data () {
     return {
-      phone: '', // 紧急手机号
+      phone: sessionStorage.getItem('phone'), // 紧急手机号
       errorMsg: '', // 错误提示
-      value: this.$route.params.value, // 购物车数量,从订单页面传递过来
-      nick: this.$route.params.nick, // 花名
-      price: this.$route.params.price // 价格
+      value: this.$route.query.value, // 购物车数量,从订单页面传递过来
+      name: sessionStorage.getItem('name'), // 花名
+      price: sessionStorage.getItem('price'), // 价格
+      isSelf: sessionStorage.getItem('isSelf'), // 是否是自取
+      isExpress: false // 是否是快递配送
     }
   },
   methods: {
-      // 确认支付操作
-      confirmPay () {
-
-      },
-      // 校验当前phone是否正确
-      check () {
-        if (!(/^1[3|5|7|8|9][0-9]\d{8}$/.test(this.phone))) {
-          this.errorMsg = '您输入的手机号码有误'
-          return
+    // 确认支付操作
+    confirmPay () {
+      let orderParams = JSON.stringify({
+        // 花品
+        'productList': [
+          {
+            'productId': (this.$store.state.product.productId)[sessionStorage.getItem('index')], // 花品id
+            'addDate': this.getDateTime(), // 添加日期
+            'quantity': this.value // 添加数量
+          }
+        ],
+        'addressId': sessionStorage.getItem('locationId'), // 地址id
+        'storeId': '', // 店铺id
+        'totalPrice': this.price, // 价格
+        'freight': '' // 货运
+      })
+      axios.put(config.url + '/userId/' + this.phone + '/createTransaction', orderParams, {
+        headers: {
+          'Content-Type': 'application/json'
         }
+      })
+        .then(function (res) {
+          console.log(res)
+          console.log(res.data)
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    // 格式化日期
+    getDateTime () {
+      let date = new Date()
+      let year = date.getFullYear()
+      let month = date.getMonth() + 1 // 注意getMonth从0开始，getDay()也是(此时0代表星期日)
+      let day = date.getDate()
+      let hour = date.getHours() // 时
+      let minutes = date.getMinutes() // 分
+      let seconds = date.getSeconds() // 秒
+      let str = year + '年' + month + '月' + day + '日' + hour + '时' + minutes + '分' + seconds + '秒'
+      return str
+    },
+    // 校验当前phone是否正确
+    check () {
+      if (!(/^1[3|5|7|8|9][0-9]\d{8}$/.test(this.phone))) {
+        this.errorMsg = '您输入的手机号码有误'
       }
+    },
+    // 到店自取
+    takeSelf () {
+      // 向本地存储一个值，来维护当前状态
+      sessionStorage.setItem('isSelf', false)
+      this.$router.push('takeself')
+    },
+    // 快递配送
+    express () {
+      // 先把自取的清除
+      sessionStorage.removeItem('isSelf')
+      this.$router.push('express')
+    }
   },
   watch: {
     //  判断是否需要错误提示
@@ -114,6 +170,11 @@ export default {
     text-align: center;
     margin: 2% 0 0 5%;
     border-radius: 10px;
+}
+/* 自取确定之后 */
+.self {
+  border: 2px solid #63B8FF;
+  color: #63B8FF;
 }
 /* 快递配送样式 */
 .express-delivery {
@@ -179,61 +240,44 @@ export default {
     margin-left: 1%;
     display: inline-block;
     display: inline-block;
-    width: 30%;
+    width: 50%;
 }
 /* 订单中的数量 */
 .info-number {
     vertical-align: bottom;
     position: relative;
-    left: -28%;
+    left: -47%;
     display: inline-block;
-    width: 10%;
+    width: 5%;
 }
 /* 订单中的价格 */
 .info-price {
     vertical-align: bottom;
     display: inline-block;
-    width: 28%;
+    width: 14%;
     text-align: right;
 }
 /* hr的border */
 hr {
     border: 0.5px solid #EDEDED;
 }
-/* 数量的区域 */
-.div-number {
-    line-height: 40px;
+/* 花艺师模块 */
+.div-people {
+  line-height: 50px;
 }
-/* 购物数量的name */
-.buy-number {
-    display: inline-block;
-    width: 50%;
+.div-people > span {
+  display: inline-block;
+  width: 50%;
 }
-/* 设置父元素来取消span和input之间的间隙，font-size子元素在重新设置 */
-.calculator {
-  font-size: 0;
+/* 花艺师的选择 */
+.select {
   display: inline-block;
   width: 50%;
   text-align: right;
 }
-/* 添加减少 */
-.add-remove{
-  display: inline-block;
-  font-size: 0.5rem;
-  background-color: #f2f2f2;
-  width: 25px;
-  height: 20px;
-  line-height: 20px;
-  text-align: center;
-}
-/* 选择当前的value */
-#number{
-  font-size: 0.5rem;
-  width: 30px;
-  height: 20px;
-  line-height: 20px;
-  text-align: center;
-  box-sizing: border-box;
+/* 选择靠右 */
+select {
+  direction: rtl;
 }
 /* 配送及优惠方式区域 */
 .div-mode-discount {
@@ -249,7 +293,7 @@ hr {
     display: inline-block;
     width: 50%;
     text-align: right;
-    color: #DEDEDE;
+    color: #B5B5B5;
 }
 /* 买家留言 */
 .div-text {
@@ -278,7 +322,6 @@ textarea {
   position: fixed;
   bottom: 0;
   line-height:35px;
-  padding-top: 1%;
   text-align: center;
 }
 /* 确认支付button */

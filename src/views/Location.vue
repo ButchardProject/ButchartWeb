@@ -1,38 +1,42 @@
 <template>
-<div class="location-body">
+<div class="location-content">
   <!-- 如果当前获取的list地址数组<0，说明用户没有地址，提示用户显示添加收货地址 -->
-  <div v-if="addressList.length < 0" class="tip">
+  <div v-if="num < 1" class="tip">
     {{tip}}
   </div>
   <div v-else class="list-body" v-for="(item,index) in num" :key="index">
-      <ul class="list-ul">
-        <li>陈{{tel[index]}}</li>
-        <li>{{addressList[index]}}</li>
-        <li class="choose">
-            <span>
-              <input class="checkbox" type="checkbox">
-              <span class="checkbox-content">选择地址</span>
-            </span>
-            <span class="edit">编辑</span>
-            <span class="remove">删除</span>
-        </li>
-     </ul>
+    <ul class="list-ul">
+      <li>{{tel[index]}}</li>
+      <li>{{addressList[index]}}</li>
+      <li class="choose">
+        <span @click="select(index)">
+          <input class="checkbox" type="checkbox">
+          <span class="checkbox-content">选择地址</span>
+        </span>
+        <span class="edit" @click="edit(index)">编辑</span>
+        <span class="remove" @click="remove(index)">删除</span>
+      </li>
+    </ul>
   </div>
   <!-- menu -->
   <div class="foot">
     <span class="add-address" @click="addAddress()">添加新地址</span>
-    <span class="sure">确定</span>
+    <span class="commit" :class="{sure : isSure}" @click="confirm()">确定</span>
   </div>
 </div>
 </template>
 <script>
+import axios from 'axios'
+import config from '@/config'
 export default {
   name: 'location',
   data () {
     return {
       tip: '请添加你的收货地址', // 如果没有收货地址就提示用户
+      isSure: false, // 是否选中相应的地址
       tel: this.$store.state.location.locationTel,
-      addressList: this.$store.state.location.locationAddress
+      addressList: this.$store.state.location.locationAddress,
+      current:'' // 当前选中的值
     }
   },
   // 初始化vue之前先去捞一把
@@ -47,6 +51,87 @@ export default {
     // 添加新地址
     addAddress () {
       this.$router.push('addlocation')
+    },
+    //  确定选择的地址，传递到地址选择页
+    confirm () {
+      if (this.current === '') {
+      } else {
+        sessionStorage.setItem('currentTel', this.tel[this.current])
+        sessionStorage.setItem('currentAddress', this.addressList[this.current])
+        this.$router.push(
+          {
+            name: 'express',
+            query: {
+              current: this.current
+            }
+          })
+      }
+    },
+    // 选择地址
+    select (index) {
+      // 判断当前是否已经选中相应地址
+      // 如果是已经true的，执行操作，在变成false，为了下次点击
+      if (this.isSure) {
+        this.current = ''
+        this.isSure = false
+        sessionStorage.removeItem('current') // 删除当前地址数值
+      } else {
+        // 如果是false，先设置为true，在执行操作
+        this.isSure = true
+        this.current = index // 把当前的index赋值给current
+        sessionStorage.setItem('current', this.current) // 当前地址数值
+      }
+    },
+    // 删除地址
+    remove (index) {
+      // 判断下当前是否被选中的
+      if (!this.isSure) {
+        this.current = index
+      }
+      // 如果当前选中删除的index与current一致，就删除本地库的数据
+      if (this.current === index) {
+        sessionStorage.removeItem('currentTel')
+        sessionStorage.removeItem('currentAddress')
+        this.current = ''
+      }
+      this.isSure = false
+      let self = this
+      if (this.$store.state.user.phone !== '') {
+        axios.delete(config.url + '/userId/' + this.$store.state.user.phone + '/deleteAddress',
+          {
+            data: [
+              (this.$store.state.location.locationId)[index]
+            ]
+          }).then(function (res) {
+          self.$store.dispatch('getLocationLists')
+        }).catch(function (error) {
+          console.log(error)
+        })
+      } else {
+        axios.delete(config.url + '/userId/' + sessionStorage.getItem('phone') + '/deleteAddress',
+          {
+            data: [
+              JSON.parse(sessionStorage.getItem('locationId'))
+            ]
+          }).then(function (res) {
+          console.log('2:'+res)
+          self.$store.dispatch('getLocationLists')
+        }).catch(function (error) {
+          console.log(error)
+        })
+      }
+    },
+    // 编辑地址
+    edit (index) {
+      this.$router.push(
+        {
+          name: 'addlocation',
+          query: {
+            index: index,
+            tel: (this.tel)[index],
+            addressList: (this.addressList)[index]
+          }
+        })
     }
   },
   computed: {
@@ -58,11 +143,14 @@ export default {
 </script>
 <style lang="css" scoped>
 /* 整个页面的大小 */
-.location-body {
+.location-content {
   width: 100%;
   height: 100%;
   background-color: #F0F0F0;
   font-size: 0.6rem;
+  padding-top: 2%;
+  overflow: scroll;
+  padding-bottom: 15%;
 }
 /* 如何当前addresslist没有元素就显示tip */
 .tip {
@@ -75,14 +163,13 @@ export default {
 }
 /* 地址的内容 */
 .list-body {
+  margin-top: 3%;
   width: 100%;
   background-color: #FFFFFF;
   line-height: 50px;
-  margin-bottom: 5%;
 }
 ul{
   margin-left: 5%;
-  /* border: 1px solid red; */
 }
 /*  checkbox选中的颜色 */
 .checkbox:checked{
@@ -153,6 +240,7 @@ ul{
   line-height:35px;
   padding-top: 1%;
 }
+/* 添加地址button */
 .add-address {
   border:1px solid #636363;
   color: #636363;
@@ -162,14 +250,19 @@ ul{
   margin-left: 2%;
   border-radius: 5px;
 }
-.sure {
+/* 确认button */
+.commit {
   display: inline-block;
   width: 45%;
   text-align: center;
   margin-left: 4%;
   border-radius: 5px;
-  background-color: #63B8FF;
+  background-color: #DEDEDE;
   color: #FFFFFF;
-  border: 1px solid#63B8FF;
+  border: 1px solid #DEDEDE;
+}
+/* 是否选中相应的地址 */
+.sure {
+  background-color: #63B8FF;
 }
 </style>

@@ -3,7 +3,7 @@
   <div>
     <!-- 导航栏 -->
     <Navigation/>
-    <div class="div-swiper">
+    <div :class="['div-swiper', opened ? 'div-swiper-open' : 'div-swiper-close']">
         <swiper :options="swiperOption" class="swiper">
       <!-- @someSwiperEvent="callback" -->
         <!-- slides -->
@@ -19,8 +19,8 @@
     <!-- content -->
     <div class="content">
         <p class="price">
-          <span>{{nick[index]}}</span>
-          <span>¥{{price[index]}}</span>
+          <span>{{name}}</span>
+          <span>¥{{price}}</span>
         </p>
         <p class="add-num">
           <span>请提前{{day}}天预订</span>
@@ -38,16 +38,12 @@
         </p>
         <hr>
         <div class="detail">
-          {{detail[index]}}
+          {{detail}}
         </div>
     </div>
     <!-- 底部fixed foot -->
-    <div class="foot">
-        <span class="carImg">
-          <img src="../assets/logo/car.png"/>
-        </span>
-        <span class="badge">{{badge}}</span>
-        <span class="join-car">加入购物车</span>
+    <div :class="['foot', opened ? 'div-swiper-open' : 'div-swiper-close']" >
+        <span class="join-car" @click="addCar()">加入购物车</span>
         <span class="buy" @click="buyNow()">立即购买</span>
     </div>
   </div>
@@ -56,28 +52,23 @@
 import Navigation from '@/components/Navigation.vue'
 import config from '@/config'
 import 'swiper/dist/css/swiper.css'
-
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
-import { Swipe, SwipeItem } from 'mint-ui'
 
 export default {
   name: 'buy',
   components: {
     Navigation,
     swiper,
-    swiperSlide,
-    Swipe,
-    SwipeItem
+    swiperSlide
   },
   data () {
     return {
       banner_list: config.imgList, // banner的图片集合
-      badge: 0, // 购物车数量
-      price: this.$store.state.product.productPrice, // 花价
-      nick: this.$store.state.product.productName, // 花名
+      price: sessionStorage.getItem('price'), // 花价
+      name: sessionStorage.getItem('name'), // 花名
       day: 1, // 提前预定天数
       value: 1, // 当前添加的数量
-      detail: this.$store.state.product.productDesc, // 描述
+      detail: sessionStorage.getItem('desc'), // 描述
       swiperOption: {
         centeredSlides: true,
         autoplay: {
@@ -92,7 +83,9 @@ export default {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev'
         }
-      }
+      },
+      badge:0, // 购物车数量
+      carInfo: [],  // 购物车里面的信息
     }
   },
   methods: {
@@ -107,32 +100,75 @@ export default {
         this.value -= 1
       }
     },
+    // 立即购买
     buyNow () {
-      // if (localStorage.getItem('phone') === null) {
-      //   this.$router.push('login')
-      // } else {
-        // 把当前价格，花名，以及数量一起传递给确认订单页面
-        this.$router.push(
-          {'name': 'confirmorder', 
-          params: { 
-            price: this.price[this.index], 
-            nick: this.nick[this.index], 
+      if (sessionStorage.getItem('phone') === null) {
+        this.$router.push('login')
+      } else {
+      // 把当前价格，花名，以及数量一起传递给确认订单页面
+      this.$router.push(
+        { 'name': 'confirmorder',
+          query: {
             value: this.value
-            }
-          })
-      // }
+          }
+        })
+      }
+    },
+    // 加入购物车
+    addCar () {
+      // 先判断是否登录
+      if (sessionStorage.getItem('phone') === null) {
+        this.$router.push('login')
+      } else {
+        if (sessionStorage.getItem('unread')){
+          this.badge = parseInt(sessionStorage.getItem('unread'))
+          this.badge = this.badge + 1 
+          // 收集当前购物车信息
+          let info = {
+            "seriesId": sessionStorage.getItem('seriesId'),
+            "productId": sessionStorage.getItem('productId'),
+            "value": this.value // 当前value的数量
+          }
+          // 判断当前本地db是否存在，如果存在直接拿出来用
+          if (this.carInfo) {
+            this.carInfo = JSON.parse(sessionStorage.getItem('carInfo'))
+            // 将当前购物车的信息存到carInfo里面,用于存本地
+            this.carInfo.push(info)
+            this.$store.dispatch('getAddCar', info)
+            this.$store.dispatch('getAddUnread', this.badge)
+            sessionStorage.setItem('carInfo', JSON.stringify(this.carInfo)) // 保存当前购物车的信息到本地
+            sessionStorage.setItem('unread', this.badge) // 保存当前未读数到本地
+          }
+        } else {
+          this.badge = this.badge + 1
+          // 收集当前购物车信息
+          let info = {
+            "seriesId": sessionStorage.getItem('seriesId'),
+            "productId": sessionStorage.getItem('productId'),
+            "value": this.value // 当前value的数量
+          }
+          // 将当前购物车的信息存到carInfo里面,用于存本地
+          this.carInfo.push(info)
+          this.$store.dispatch('getAddCar', info)
+          this.$store.dispatch('getAddUnread', this.badge)
+          sessionStorage.setItem('carInfo', JSON.stringify(this.carInfo)) // 保存当前购物车的信息到本地
+          sessionStorage.setItem('unread', this.badge) // 保存当前未读数到本地
+        }
+      }
     }
   },
   computed: {
     // 观察当前是哪个list的元素路由过来
     index: function () {
-      return this.$route.params.index
+      return this.$route.query.index
+    },
+    opened: function() {
+      return this.$store.state.opened
     }
   }
 }
 </script>
 <style lang="css" scoped>
-/* 这里的z-index遗留问题，上下层级 */
 .div-swiper {
   height: 50%;
   width: 100%;
@@ -218,25 +254,12 @@ export default {
   font-size: 0.5rem;
   line-height: 35px;
 }
-/* 购物车图片 */
-.carImg {
-  display: inline-block;
-  background-color: #F2F2F2;
-  width: 40%;
-  height: 100%;
-  text-align: center;
-}
-.carImg > img {
-  display: inline-block;
-  width: 0.8rem;
-  height: 0.8rem;
-}
 /* 加入购物车button */
 .join-car {
   display: inline-block;
   background-color: #63B8FF;
   text-align: center;
-  width: 30%;
+  width: 50%;
   height: 100%;
 }
 /* 立即购买 */
@@ -244,21 +267,7 @@ export default {
   display: inline-block;
   background-color: #6495ED;
   text-align: center;
-  width: 30%;
+  width: 50%;
   height: 100%;
-}
-/* bagde */
-.badge {
-  background-color: #63B8FF;
-  border-radius: 15px;
-  color: #FFFFFF;
-  position: absolute;
-  font-size: 0.2rem;
-  left:20.5%;
-  top:8%;
-  display: inline-block;
-  line-height: 14px;
-  width: 0.5rem;
-  text-align: center;
 }
 </style>

@@ -1,20 +1,22 @@
 <template>
-  <div class="content">
-    <div class="div-text">
-      <!-- 选中checkbox -->
-      <input class="checkbox" type="checkbox">
-      <span class="text">等待买家付款</span>
-    </div>
-    <img class="photo" src="../assets/images/list01.png"/>
-    <span class="price">¥660</span>
-    <span class="number">x1</span>
-    <div class="div-sum">
-      共<span>100</span>件商品&nbsp;&nbsp;共计:¥
-      <span>10000</span>
-    </div>
-    <div class="confirm">
-      <span class="cancel">取消</span>
-      <span class="pay">付款</span>
+  <div>
+    <div class="content" v-for="(item,index) in num" :key="index">
+      <div class="div-text">
+        <!-- 选中checkbox -->
+        <input class="checkbox" type="checkbox">
+        <span class="text">等待买家付款</span>
+      </div>
+      <img class="photo" src="../assets/images/list01.png"/>
+      <span class="price">¥{{price[index]}}</span>
+      <span class="number">x{{value[index]}}</span>
+      <div class="div-sum">
+        共<span>{{value[index]}}</span>件商品&nbsp;&nbsp;
+        共计:¥<span>{{price[index] * value[index]}}</span>
+      </div>
+      <div class="confirm">
+        <span class="cancel">取消</span>
+        <span class="pay">付款</span>
+      </div>
     </div>
   </div>
 </template>
@@ -23,7 +25,42 @@ export default {
   name: 'waitpay',
   data () {
     return {
-      
+      price: this.$store.state.carOrder.price, // 价格
+      seriesId: '', // 系列id
+      productId: '', // 产品id
+      value: [], // 当前未付款的数量
+    }
+  },
+  methods: {
+    getProduct () {
+      let carInfo = JSON.parse(sessionStorage.getItem('carInfo'))
+      if(carInfo){
+        for (var i in carInfo){
+          this.value.push(carInfo[i].value)
+          let ids = {
+            seriesId: carInfo[i].seriesId,
+            productId: carInfo[i].productId 
+          }
+          this.$store.dispatch('getCarOrder', ids)
+        }
+      }
+    }
+  },
+  mounted () {
+    this.getProduct()
+  },
+  computed: {
+    // 待付款就根据未读来显示未处理的订单
+    num: function () {
+      if (this.$store.state.unread){
+        return this.$store.state.unread
+      }
+      if (parseInt(sessionStorage.getItem('unread'))) {
+        return parseInt(sessionStorage.getItem('unread'))
+      }
+      else {
+        return 0
+      }
     }
   }
 }
