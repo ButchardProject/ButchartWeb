@@ -28,18 +28,18 @@ export default {
       price: this.$store.state.carOrder.price, // 价格
       seriesId: '', // 系列id
       productId: '', // 产品id
-      value: [], // 当前未付款的数量
+      value: [] // 当前未付款的数量
     }
   },
   methods: {
     getProduct () {
       let carInfo = JSON.parse(sessionStorage.getItem('carInfo'))
-      if(carInfo){
-        for (var i in carInfo){
+      if (carInfo) {
+        for (var i in carInfo) {
           this.value.push(carInfo[i].value)
           let ids = {
             seriesId: carInfo[i].seriesId,
-            productId: carInfo[i].productId 
+            productId: carInfo[i].productId
           }
           this.$store.dispatch('getCarOrder', ids)
         }
@@ -52,13 +52,12 @@ export default {
   computed: {
     // 待付款就根据未读来显示未处理的订单
     num: function () {
-      if (this.$store.state.unread){
+      if (this.$store.state.unread) {
         return this.$store.state.unread
       }
       if (parseInt(sessionStorage.getItem('unread'))) {
         return parseInt(sessionStorage.getItem('unread'))
-      }
-      else {
+      } else {
         return 0
       }
     }
@@ -166,7 +165,7 @@ export default {
   text-align: right;
 }
 /* 付款按钮 */
-.pay { 
+.pay {
   margin-left: 5%;
   border: 1px solid #63B8FF;
   line-height: 20px;

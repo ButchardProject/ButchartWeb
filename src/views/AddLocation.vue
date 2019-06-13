@@ -21,7 +21,7 @@
             </li>
             <li>
                 <span class="property">收货地址</span>
-                <span v-if="flag" @click="choose()">{{myAddressProvince}} {{myAddressCity}} {{myAddresscounty}}</span>
+                <span v-if="flag" @click="choose()">{{myAddressProvince}} {{myAddressCity}} {{district}}</span>
                 <span v-else  @click="choose()" class="defaultAddress">请选择地址</span>
                 <!-- 使用mint-ui来实现省市区三级联动 -->
                 <mt-popup v-model="popupVisible" position="bottom">
@@ -88,18 +88,25 @@ export default {
         }],
       myAddressProvince: '省',
       myAddressCity: '市',
-      myAddresscounty: '区/县',
+      district: '区/县',
       // 从location页面编辑过来的数据
-      receiveAddress: {
+      receiveData: {
         index: this.$route.query.index,
         tel: this.$route.query.tel,
-        addressList: this.$route.query.addressList
+        name: this.$route.query.name,
+        province: this.$route.query.province,
+        city: this.$route.query.city,
+        district: this.$route.query.district,
+        street: this.$route.query.street,
+        flag: this.$route.query.flag
       }
     }
   },
-  mounted() {
+  mounted () {
     // 解析传递过来的信息
-    this.handleInfo(this.receiveAddress.tel, this.receiveAddress.addressList)
+    if (!this.receiveData.index) {
+      this.handleInfo(this.receiveData)
+    }
   },
   methods: {
     // 保证checkbox只能选择其一
@@ -122,7 +129,7 @@ export default {
         picker.setSlotValues(2, addresslist[values[0]][values[1]]) // 区/县数据就是一个数组
         this.myAddressProvince = values[0]
         this.myAddressCity = values[1]
-        this.myAddresscounty = values[2]
+        this.district = values[2]
       }
     },
     // 选择省市区三级联动的popup显示
@@ -144,17 +151,20 @@ export default {
       } else {
         // 防止刷新之后当前vuex中的数据没了
         if (this.$store.state.user.phone !== '') {
-          // 将省市区三级和详细地址合并到一起
-          let local = this.myAddressProvince + this.myAddressCity + this.myAddresscounty + this.address
           // 转成json
           let addressData = JSON.stringify(
-            { 'address': local,
+            {
+              'name': this.name,
+              'province': this.myAddressProvince,
+              'city': this.myAddressCity,
+              'district': this.district,
               'tel': this.phone,
+              'street': this.address,
               'postcode': 'string',
               'isDefault': 'true'
             })
           // 请求服务器
-          axios.put(config.url + '/userId/' + this.$store.state.user.phone + '/addAddress?', addressData)
+          axios.put(config.url + '/user/' + this.$store.state.user.phone + '/addAddress?access_token=' + sessionStorage.getItem('token'), addressData)
             .then(function (res) {
               console.log(res)
               if (res.status === 200) {
@@ -164,17 +174,21 @@ export default {
               console.log(error)
             })
         } else {
-          let local = this.myAddressProvince + this.myAddressCity + this.myAddresscounty + this.address
           let addressData = JSON.stringify(
-            { 'address': local,
+            {
+              'name': this.name,
+              'province': this.myAddressProvince,
+              'city': this.myAddressCity,
+              'district': this.district,
               'tel': this.phone,
+              'street': this.address,
               'postcode': 'string',
               'isDefault': 'true'
             })
           // then中无法访问this对象
           let self = this
           // 添加请求header
-          axios.put(config.url + '/userId/' + sessionStorage.getItem('phone') + '/addAddress', addressData, {
+          axios.put(config.url + '/user/' + sessionStorage.getItem('phone') + '/addAddress?access_token=' + sessionStorage.getItem('token'), addressData, {
             headers: {
               'Content-Type': 'application/json'
             }
@@ -191,66 +205,14 @@ export default {
       }
     },
     // 处理编辑页传递过来的信息
-    handleInfo(tel, addAddressList){
-      console.log(tel, addAddressList)
-      if (!tel) {
-        return 
-      } else {
-        this.flag = true // 先把默认的去掉,展示当前信息
-        this.phone = tel // 先拿用户号码
-
-        let index = 0
-        // 当前检索省的标记
-        let currentProvice = addAddressList.indexOf("省")
-        if (currentProvice == -1) { // 如果没有检索到省
-          index = addAddressList.indexOf("自治区") // 继续检索自治区
-          if (index != -1) { // 如果已经找到自治区
-            console.log('自治区:'+index)
-            this.myAddressProvince = addAddressList.substring(0, index + 3)
-            console.log('1:'+this.myAddressProvince)
-          } else { // 否则就是直辖市
-            console.log('直辖市:'+index)
-            this.myAddressProvince = addAddressList.substring(0, index + 4)
-            console.log('2:'+this.myAddressProvince)
-          }
-        } else { // 检索到省
-          console.log('省:'+index)
-          this.myAddressProvince = addAddressList.substring(0, currentProvice + 1)
-          console.log('3:'+this.myAddressProvince)
-        }
-
-        // 当前检索市的标记
-        let currentCity = addAddressList.indexOf("市辖区") // 市辖区
-        if (currentCity != -1) { //检索到市辖区
-          // 因为上面已经检索到是直辖市，这边index就是上面的值为-1,当前市辖区已经找到，currentCity就是3
-          this.myAddressCity = addAddressList.substring(index + 4, currentCity + 3)  // 就是市辖区的
-          console.log('4:'+this.myAddressCity)
-        } else { // 如果不是市辖区，那说明是，省或者自治区打头
-          var city = addAddressList.indexOf('市') // 在从里面去获取市
-          if (index == 0) { // 省
-            this.myAddressCity = addAddressList.substring(index + 3, city + 1)
-            console.log('5:'+this.myAddressCity)
-          } else { // 自治区
-            this.myAddressCity = addAddressList.substring(index + 3, city + 1)
-            console.log('6:'+this.myAddressCity)
-          }
-        }
-
-        // 当前检索区县的标记
-        let currentCounty = addAddressList.lastIndexOf("区")
-        if (currentCounty == -1) { // 不是区
-          currentCounty = addAddressList.indexOf("县")
-          this.myAddresscounty = addAddressList.substring(city + 1, currentCounty + 1)
-          this.address = addAddressList.substring(currentCounty + 1)
-          console.log('7-1:'+this.address)
-          console.log('7:'+this.myAddresscounty)
-        } else { // 是区
-          this.myAddresscounty = addAddressList.substring(city + 1, currentCounty + 1)
-          this.address = addAddressList.substring(currentCounty + 1)
-          console.log('8-1:'+this.address)
-          console.log('8:'+this.myAddresscounty)
-        }
-      }
+    handleInfo (receiveData) {
+      this.flag = receiveData.flag
+      this.name = receiveData.name
+      this.phone = receiveData.tel
+      this.myAddressProvince = receiveData.province
+      this.myAddressCity = receiveData.city
+      this.district = receiveData.district
+      this.address = receiveData.street
     }
   }
 }

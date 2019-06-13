@@ -61,6 +61,7 @@
 <script>
 import config from '@/config'
 import axios from 'axios'
+import { MessageBox } from 'mint-ui'
 export default {
   name: 'confirmorder',
   data () {
@@ -82,16 +83,25 @@ export default {
         'productList': [
           {
             'productId': (this.$store.state.product.productId)[sessionStorage.getItem('index')], // 花品id
-            'addDate': this.getDateTime(), // 添加日期
-            'quantity': this.value // 添加数量
+            'quantity': this.value, // 添加数量
+            'comment': this.getDateTime() // todo，需要修改
           }
         ],
         'addressId': sessionStorage.getItem('locationId'), // 地址id
         'storeId': '', // 店铺id
         'totalPrice': this.price, // 价格
-        'freight': '' // 货运
+        'floristId': '', // 花艺师id
+        'freight': '', // 货运
+        'logistics': {
+          'trackingId': 'string',
+          'deliveryMethod': 'string',
+          'freight': 'string',
+          'logisticsCompany': 'string'
+        },
+        'expectedDeliverDate': 'string',
+        'comment': 'string'
       })
-      axios.put(config.url + '/userId/' + this.phone + '/createTransaction', orderParams, {
+      axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -99,6 +109,9 @@ export default {
         .then(function (res) {
           console.log(res)
           console.log(res.data)
+          if (res.status === 200) {
+            MessageBox('提示', '支付成功')
+          }
         })
         .catch(function (error) {
           console.log(error)

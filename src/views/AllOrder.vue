@@ -36,7 +36,6 @@
 </div>
 </template>
 <script>
-import { Navbar, TabItem } from 'mint-ui'
 import WaitPay from '@/components/WaitPay'
 import WaitDelivery from '@/components/WaitDelivery'
 import WaitReceive from '@/components/WaitReceive'
@@ -44,8 +43,6 @@ import Completed from '@/components/Completed'
 export default {
   name: 'allorder',
   components: {
-    Navbar,
-    TabItem,
     WaitPay,
     WaitDelivery,
     WaitReceive,

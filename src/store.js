@@ -10,6 +10,7 @@ Vue.use(Vuex)
 */
 export default new Vuex.Store({
   state: {
+    token: '', // 登陆之后保存鉴权token，后续都会用到
     user: {
       _id: '', // 用户id
       phone: '' // 用户手机号
@@ -25,13 +26,6 @@ export default new Vuex.Store({
       productDesc: [], // 系列产品的描述
       productNum: '' // 系列产品的数量
     },
-    // 用户地址
-    location: {
-      locationId: [], // 地址id
-      locationAddress: [], // 用户地址
-      locationTel: [], // 用户Tel，与登陆的phone一致，为了测试先保留
-      locationNum: '' // 用户地址的数量
-    },
     opened: false, // nav默认关闭
     // 店铺
     storeLists: {
@@ -39,7 +33,10 @@ export default new Vuex.Store({
       storeId: [], // 店铺id
       storeName: [], // 店铺名字
       storeTel: [], // 店铺电话
-      storeAddress: [], // 店铺地址
+      storeProvince: [], // 店铺省份
+      storeCity: [], // 店铺城市
+      storeDistrict: [], // 店铺区域
+      storeStreet: [], // 店铺地址
       storeStatus: [] // 店铺状态
     },
     // 门店自取
@@ -76,6 +73,10 @@ export default new Vuex.Store({
       console.log(phone)
       console.log(state.user.phone)
     },
+    saveToken (state, token) {
+      state.token = token
+      console.log(token)
+    },
     // 添加鲜花系列
     increment (state, data) {
       // console.log(data._id)
@@ -93,24 +94,15 @@ export default new Vuex.Store({
     addSeriesNum (state, num) {
       state.product.productNum = num
     },
-    // 获取地址列表
-    addAddress (state, data) {
-      state.location.locationId.push(data._id)
-      state.location.locationAddress.push(data.address)
-      state.location.locationTel.push(data.tel)
-      // 存储到当前本地数据库
-      sessionStorage.setItem('locationId', JSON.stringify(data._id))
-    },
-    // 获取地址列表的数量
-    addAddressNum (state, num) {
-      state.location.locationNum = num
-    },
     // 获取店铺列表
     addStoreLists (state, data) {
       state.storeLists.storeId.push(data._id)
       state.storeLists.storeName.push(data.name)
       state.storeLists.storeTel.push(data.tel)
-      state.storeLists.storeAddress.push(data.address)
+      state.storeLists.storeProvince.push(data.province)
+      state.storeLists.storeCity.push(data.city)
+      state.storeLists.storeDistrict.push(data.district)
+      state.storeLists.storeStreet.push(data.street)
       state.storeLists.storeStatus.push(data.status)
     },
     // 获取店铺的数量
@@ -147,10 +139,15 @@ export default new Vuex.Store({
     setUser (context, phone) {
       context.commit('setUser', phone)
     },
+    // 存储token
+    saveToken (context, token) {
+      context.commit('saveToken', token)
+    },
     // 异步请求花的信息
     getProducts (context) {
-      axios.get(config.url + '/getProductSeries')
+      axios.get(config.url + '/getProductSeries?access_token=' + sessionStorage.getItem('token'))
         .then((res) => {
+          console.log(res)
           for (let data in res.data) {
             context.commit('increment', res.data[data])
           }
@@ -161,7 +158,7 @@ export default new Vuex.Store({
       // 先判断当前是否有id，如果没有id，则从sessionStorage去获取
       if (context.state.seriesId.length < 1) {
         var sidArray = sessionStorage.getItem('seriesId')
-        axios.get(config.url + '/seriesId/' + sidArray + '/getProductsBySeries')
+        axios.get(config.url + '/seriesId/' + sidArray + '/getProductsBySeries?access_token=' + sessionStorage.getItem('token'))
           .then((res) => {
             context.commit('addSeriesNum', res.data.length)
             for (let data in res.data) {
@@ -171,7 +168,7 @@ export default new Vuex.Store({
       } else {
         // 有当前的seriesId，直接去服务器请求
         sessionStorage.setItem('seriesId', (context.state.seriesId)[index])
-        axios.get(config.url + '/seriesId/' + (context.state.seriesId)[index] + '/getProductsBySeries')
+        axios.get(config.url + '/seriesId/' + (context.state.seriesId)[index] + '/getProductsBySeries?access_token=' + sessionStorage.getItem('token'))
           .then((res) => {
             context.commit('addSeriesNum', res.data.length)
             for (let data in res.data) {
@@ -180,46 +177,16 @@ export default new Vuex.Store({
           })
       }
     },
-    // 通过userid获取用户地址，这里请求的号码先写死，服务器未进行校验,context.state.user.phone
-    getLocationLists (context, index) {
-      if (context.state.user.phone !== '') {
-        axios.get(config.url + '/userId/' + context.state.user.phone + '/getAddress')
-          .then((res) => {
-            console.log(res.data.length)
-            context.commit('addAddressNum', res.data.length)
-            for (let data in res.data) {
-              context.commit('addAddress', res.data[data])
-            }
-          })
-      } else {
-        axios.get(config.url + '/userId/' + sessionStorage.getItem('phone') + '/getAddress')
-          .then((res) => {
-            context.commit('addAddressNum', res.data.length)
-            for (let data in res.data) {
-              context.commit('addAddress', res.data[data])
-            }
-          })
-      }
-    },
     // 通过userid获取店铺地址
     getStoreLists (context) {
-      if (context.state.user.phone !== '') {
-        axios.get(config.url + '/user/' + context.state.user.phone + '/getStoreList')
-          .then((res) => {
-            context.commit('addStoreListsNum', res.data.length)
-            for (let data in res.data) {
-              context.commit('addStoreLists', res.data[data])
-            }
-          })
-      } else {
-        axios.get(config.url + '/user/' + sessionStorage.getItem('phone') + '/getStoreList')
-          .then((res) => {
-            context.commit('addStoreListsNum', res.data.length)
-            for (let data in res.data) {
-              context.commit('addStoreLists', res.data[data])
-            }
-          })
-      }
+      axios.get(config.url + '/getStoreList?access_token=' + sessionStorage.getItem('token'))
+        .then((res) => {
+          console.log(res)
+          context.commit('addStoreListsNum', res.data.length)
+          for (let data in res.data) {
+            context.commit('addStoreLists', res.data[data])
+          }
+        })
     },
     // 保存当前门店自取的店铺信息及时间
     saveStore (context, data) {
@@ -236,7 +203,7 @@ export default new Vuex.Store({
     // 购物车请求服务器获取数据
     getCarOrder (context, data) {
       let id = data.productId // 防止在axios无法获取到当前productid
-      axios.get(config.url + '/seriesId/' + data.seriesId + '/getProductsBySeries')
+      axios.get(config.url + '/seriesId/' + data.seriesId + '/getProductsBySeries?access_token=' + sessionStorage.getItem('token'))
         .then((res) => {
           for (let data in res.data) {
             if (res.data[data]._id === id) {

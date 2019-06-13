@@ -128,7 +128,7 @@ export default {
   text-align: right;
 }
 /* 付款按钮 */
-.pay { 
+.pay {
   border: 1px solid #63B8FF;
   line-height: 20px;
   display: inline-block;

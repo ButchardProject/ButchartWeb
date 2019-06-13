@@ -43,7 +43,7 @@ export default {
       current: '', // 当前选中的li元素
       title: '', // 当前title显示信息
       flag: false, // 存储当前title信息
-      selected: '2', // 传递到allorder的值
+      selected: '2' // 传递到allorder的值
     }
   },
   // 在vue创建之前先获取
@@ -89,7 +89,7 @@ export default {
         this.$router.push('login')
       } else {
         this.$router.push({
-          name:'allorder',
+          name: 'allorder',
           query: {
             selected: this.selected
           }

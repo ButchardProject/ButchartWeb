@@ -15,7 +15,7 @@
                     </div>
                     <div>
                       <span class="title">店铺地址: </span>
-                      <span class="info">{{storeAddress[flag]}}</span>
+                      <span class="info">{{storeProvince[flag]+storeCity[flag]+storeDistrict[flag]+storeStreet[flag]}}</span>
                     </div>
                     <div>
                       <span class="title">店铺电话: </span>
@@ -59,7 +59,10 @@ export default {
       date: '', // 日期
       time: '', // 时间
       storeName: this.$store.state.storeLists.storeName, // 店铺名称
-      storeAddress: this.$store.state.storeLists.storeAddress, // 店铺地址
+      storeProvince: this.$store.state.storeLists.storeProvince, // 店铺省份
+      storeCity: this.$store.state.storeLists.storeCity, // 店铺城市
+      storeDistrict: this.$store.state.storeLists.storeDistrict, // 店铺区域
+      storeStreet: this.$store.state.storeLists.storeStreet, // 店铺街道
       storeTel: this.$store.state.storeLists.storeTel, // 店铺号码
       storeStatus: this.$store.state.storeLists.storeStatus, // 店铺状态
       visible: false, // popup的显示
