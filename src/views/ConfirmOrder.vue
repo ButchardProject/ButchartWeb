@@ -2,7 +2,7 @@
 <div class="confirm-order-body">
     <div class="header">
       <span class="shop-yourself" @click="takeSelf()" :class="{self: isSelf}">到店自取</span>
-      <span class="express-delivery" @click="express()">快递配送</span>
+      <span class="express-delivery" @click="express()" :class="{express: isExpress}">快递配送</span>
     </div>
     <!-- 号码行 -->
     <div class="phone-info">
@@ -28,18 +28,16 @@
       <div class="div-people">
         <span class="people">花艺师</span>
         <div class="select">
-          <select>
-            <option value='' disabled selected>默认</option>
-            <option value="volvo">Volvo</option>
-            <option value="saab">Saab</option>
-            <option value="opel">Opel</option>
+          <select @change="selectFlorist($event)">
+            <option value='default' selected>默认</option>
+            <option :value="floristId[index]" v-for="(item,index) in floristName.length" :key="index">{{floristName[index]}}</option>
           </select>
         </div>
       </div>
       <div class="div-mode-discount">
           <span class="mode-discount-name">配送方式</span>
-          <span class="mode-discount-common" v-if="!isSelf">></span>
-          <span class="mode-discount-common" v-else>到店自取</span>
+          <span class="mode-discount-common" v-if="delivery">{{ship}}</span>
+          <span class="mode-discount-common" v-else>></span>
       </div>
       <div class="div-mode-discount">
           <span class="mode-discount-name">店铺优惠</span>
@@ -48,9 +46,11 @@
       <hr>
       <div class="div-text">
         <span>买家留言：</span>
-        <textarea type="text" placeholder="是否需要卡片，卡片内容等（限制30个字）" rows="3" cols="40" maxlength="30"></textarea>
+        <textarea type="text" placeholder="是否需要卡片，卡片内容等（限制30个字）" rows="3" cols="40" maxlength="30" v-model="comment"></textarea>
       </div>
-      <div class="div-sum">共<span>{{value}}</span>件商品&nbsp;&nbsp;共计:<span>{{value * price}}</span>元</div>
+      <div class="div-sum">共<span>{{value}}</span>件商品&nbsp;&nbsp;共计:
+        <span>{{total}}元</span>
+      </div>
     </div>
     <!-- 确定支付button -->
     <div class="confirm">
@@ -62,60 +62,148 @@
 import config from '@/config'
 import axios from 'axios'
 import { MessageBox } from 'mint-ui'
+import { setTimeout } from 'timers';
 export default {
   name: 'confirmorder',
   data () {
     return {
       phone: sessionStorage.getItem('phone'), // 紧急手机号
       errorMsg: '', // 错误提示
-      value: this.$route.query.value, // 购物车数量,从订单页面传递过来
-      name: sessionStorage.getItem('name'), // 花名
-      price: sessionStorage.getItem('price'), // 价格
-      isSelf: sessionStorage.getItem('isSelf'), // 是否是自取
-      isExpress: false // 是否是快递配送
+      value: parseInt(sessionStorage.getItem('flowerNum')), // 购物车数量,从订单页面传递过来
+      name: sessionStorage.getItem('flowerName'), // 花名
+      price: parseInt(sessionStorage.getItem('price')), // 价格
+      isSelf: false, // 是否是自取
+      isExpress: false, // 是否是配送
+      ship: '', // 配送方式
+      delivery: false, // 根据配送方式显示
+      money: parseInt(this.$route.query.money), // 运费
+      total: '', // 总的价格
+      floristId: [], // 花艺师的ID
+      floristName: [], // 花艺师的username
+      currentFloristId: sessionStorage.getItem('defaultFlorist'), // 当前花艺师
+      comment: ''  // 备注
+    }
+  },
+  // 页面创建前先去获取一把花艺师
+  created () {
+    let that = this
+    axios.get(config.url + '/getFlorists?access_token=' + sessionStorage.getItem('token'))
+          .then(function (res) {
+            console.log(res.data)
+            for (let index in res.data) {
+              that.floristId.push(res.data[index].florist._id) // 先把花艺师的id推进去
+              that.floristName.push(res.data[index].username) // 花艺师的name推进去
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+  },
+  mounted () {
+    this.total = this.value * this.price // 表明当前总价
+    // 判断当前配送方式
+    if (this.$route.query.ship) {
+      this.delivery = true
+      let ship = this.$route.query.ship
+      if (ship === 'takeself') {
+        this.isSelf = true
+        this.isExpress = false
+        this.ship = '到店自取'
+      } else {
+        this.isSelf = false
+        this.isExpress = true
+        this.ship = '快递配送 ' + this.money + '¥'
+        this.total += this.money
+      }
     }
   },
   methods: {
+    // 选择花艺师
+    selectFlorist (event) {
+      this.currentFloristId = event.target.value
+    },
     // 确认支付操作
     confirmPay () {
-      let orderParams = JSON.stringify({
-        // 花品
-        'productList': [
-          {
-            'productId': (this.$store.state.product.productId)[sessionStorage.getItem('index')], // 花品id
-            'quantity': this.value, // 添加数量
-            'comment': this.getDateTime() // todo，需要修改
+      let that = this
+      // 自取
+      if (this.$route.query.ship === 'takeself') {
+        let orderParams = JSON.stringify({
+          // 花品
+          'productList': [
+            {
+              'productId': (sessionStorage.getItem('productId')), // 花品id
+              'price': parseInt(sessionStorage.getItem('price')), // 花的价格
+              'quantity': this.value, // 添加数量
+            }
+          ],
+          'storeId': JSON.parse(sessionStorage.getItem('storeId')), // 店铺id
+          'totalPrice': parseInt(this.total), // 价格
+          'floristId': this.currentFloristId, // 花艺师id
+          'logistics': {
+            'deliveryMethod': '自取',
+            'freight': parseInt(this.money),
+          },
+          'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+          'comment': this.comment
+        })
+        axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
+          headers: {
+            'Content-Type': 'application/json'
           }
-        ],
-        'addressId': sessionStorage.getItem('locationId'), // 地址id
-        'storeId': '', // 店铺id
-        'totalPrice': this.price, // 价格
-        'floristId': '', // 花艺师id
-        'freight': '', // 货运
-        'logistics': {
-          'trackingId': 'string',
-          'deliveryMethod': 'string',
-          'freight': 'string',
-          'logisticsCompany': 'string'
-        },
-        'expectedDeliverDate': 'string',
-        'comment': 'string'
-      })
-      axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-        .then(function (res) {
+        })
+          .then(function (res) {
+            console.log(res)
+            console.log(res.data)
+            if (res.status === 200) {
+              MessageBox('提示', '支付成功')
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      } else { //  快递配送
+        let orderParams = JSON.stringify({
+          // 花品
+          'productList': [
+            {
+              'productId': (sessionStorage.getItem('productId')), // 花品id
+              'price': parseInt(sessionStorage.getItem('price')), // 花的价格
+              'quantity': this.value, // 添加数量
+            }
+          ],
+          'addressId': sessionStorage.getItem('currentLocationId'), // 地址id
+          'totalPrice': parseInt(this.total), // 价格
+          'floristId': this.currentFloristId, // 花艺师id
+          'logistics': {
+            'deliveryMethod': '顺丰',
+            'freight': parseInt(this.money),
+          },
+          'expectedDeliverDate': JSON.parse(sessionStorage.getItem('expressMainDate')) + JSON.parse(sessionStorage.getItem('expressTime')),
+          'comment': this.comment
+        })
+        axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(function (res) {
           console.log(res)
           console.log(res.data)
           if (res.status === 200) {
             MessageBox('提示', '支付成功')
+            setTimeout(function(){
+              that.$router.push({
+                'name': 'allorder',
+                query: {
+                  'selected': '3'
+                }
+              })
+            },1000)
           }
         })
-        .catch(function (error) {
-          console.log(error)
-        })
+          .catch(function (error) {
+            console.log(error)
+          })
+      }
     },
     // 格式化日期
     getDateTime () {
@@ -137,15 +225,40 @@ export default {
     },
     // 到店自取
     takeSelf () {
-      // 向本地存储一个值，来维护当前状态
-      sessionStorage.setItem('isSelf', false)
-      this.$router.push('takeself')
+      // 判断是第一次过去还是第二次
+      if (this.$route.query.ship) {
+        this.$router.push(
+          { 'name': 'takeself',
+            query: {
+              isFirst: 1
+            }
+          })
+      } else {
+        this.$router.push(
+          { 'name': 'takeself',
+            query: {
+              isFirst: 0
+            }
+          })
+      }
     },
     // 快递配送
     express () {
-      // 先把自取的清除
-      sessionStorage.removeItem('isSelf')
-      this.$router.push('express')
+      if (this.$route.query.ship) {
+        this.$router.push(
+          { 'name': 'express',
+            query: {
+              isFirst: 1
+            }
+          })
+      } else {
+        this.$router.push(
+          { 'name': 'express',
+            query: {
+              isFirst: 0
+            }
+          })
+      }
     }
   },
   watch: {
@@ -198,6 +311,10 @@ export default {
     margin-left: 5%;
     text-align: center;
     border-radius: 10px;
+}
+.express {
+  border: 2px solid #63B8FF;
+  color: #63B8FF;
 }
 /* 手机信息行 */
 .phone-info {

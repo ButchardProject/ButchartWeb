@@ -6,9 +6,12 @@
         <input class="checkbox" type="checkbox">
         <span class="text">等待买家付款</span>
       </div>
-      <img class="photo" src="../assets/images/list01.png"/>
-      <span class="price">¥{{price[index]}}</span>
-      <span class="number">x{{value[index]}}</span>
+      <div class="div-content">
+        <img class="photo" src="../assets/images/list01.png"/>
+        <span class="name">【】</span>
+        <span class="price">¥{{price[index]}}</span>
+        <span class="number">x{{value[index]}}</span>
+      </div>
       <div class="div-sum">
         共<span>{{value[index]}}</span>件商品&nbsp;&nbsp;
         共计:¥<span>{{price[index] * value[index]}}</span>
@@ -137,19 +140,26 @@ export default {
   height: 40%;
   padding-bottom: 2%;
 }
-/* 单价 */
-.price {
+/* 花的名称 */
+.name {
   vertical-align: top;
   display: inline-block;
-  width: 65%;
-  text-align: right;
+  width: 40%;
+}
+/* 单价 */
+.price {
+  position: relative;
+  vertical-align: top;
   font-size: 0.5rem;
+  display: inline-block;
+  left: 15%;
 }
 /* 数量 */
 .number {
   position: relative;
   font-size: 0.5rem;
-  right: 3%;
+  display: inline-block;
+  left: 8%;
 }
 /* 合计价格 */
 .div-sum {

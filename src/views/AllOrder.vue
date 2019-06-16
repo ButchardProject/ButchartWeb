@@ -55,6 +55,7 @@ export default {
   },
   // 在vue加载完之后，去获取传过来的选中值
   mounted () {
+    console.log(this.$route.query.selected)
     this.selected = this.$route.query.selected
   }
 }

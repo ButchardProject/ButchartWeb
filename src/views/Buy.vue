@@ -53,7 +53,7 @@ import Navigation from '@/components/Navigation.vue'
 import config from '@/config'
 import 'swiper/dist/css/swiper.css'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
-
+import axios from 'axios'
 export default {
   name: 'buy',
   components: {
@@ -65,7 +65,7 @@ export default {
     return {
       banner_list: config.imgList, // banner的图片集合
       price: sessionStorage.getItem('price'), // 花价
-      name: sessionStorage.getItem('name'), // 花名
+      name: sessionStorage.getItem('flowerName'), // 花名
       day: 1, // 提前预定天数
       value: 1, // 当前添加的数量
       detail: sessionStorage.getItem('desc'), // 描述
@@ -106,6 +106,7 @@ export default {
         this.$router.push('login')
       } else {
       // 把当前价格，花名，以及数量一起传递给确认订单页面
+      sessionStorage.setItem('flowerNum', this.value)
       this.$router.push(
         { 'name': 'confirmorder',
           query: {
@@ -143,9 +144,9 @@ export default {
           this.badge = this.badge + 1
           // 收集当前购物车信息
           let info = {
-            "seriesId": sessionStorage.getItem('seriesId'),
-            "productId": sessionStorage.getItem('productId'),
-            "value": this.value // 当前value的数量
+            'seriesId': sessionStorage.getItem('seriesId'),
+            'productId': sessionStorage.getItem('productId'),
+            'value': this.value // 当前value的数量
           }
           // 将当前购物车的信息存到carInfo里面,用于存本地
           this.carInfo.push(info)
@@ -162,7 +163,7 @@ export default {
     index: function () {
       return this.$route.query.index
     },
-    opened: function() {
+    opened: function () {
       return this.$store.state.opened
     }
   }

@@ -52,7 +52,7 @@ export default {
           }
         })
       // 把当前花的名称，价格以及描述存到sessionStorage里面
-      sessionStorage.setItem('name', (this.name)[index])
+      sessionStorage.setItem('flowerName', (this.name)[index])
       sessionStorage.setItem('price', (this.price)[index])
       sessionStorage.setItem('desc', (this.desc)[index])
       sessionStorage.setItem('index', index)

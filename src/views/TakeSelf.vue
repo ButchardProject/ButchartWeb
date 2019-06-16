@@ -51,7 +51,7 @@
 </div>
 </template>
 <script>
-import { DatetimePicker , Popup, MessageBox } from 'mint-ui'
+import { MessageBox } from 'mint-ui'
 export default {
   name: 'takeself',
   data () {
@@ -65,9 +65,10 @@ export default {
       storeStreet: this.$store.state.storeLists.storeStreet, // 店铺街道
       storeTel: this.$store.state.storeLists.storeTel, // 店铺号码
       storeStatus: this.$store.state.storeLists.storeStatus, // 店铺状态
+      storeId: this.$store.state.storeLists.storeId, // 店铺id
       visible: false, // popup的显示
-      flag: '', // 用来展示哪个地址
-      current: '' // 当前选中的门店
+      flag: '', // 中转index
+      current: '', // 当前选中的门店
     }
   },
   methods: {
@@ -92,6 +93,8 @@ export default {
       var nowMonth = date.getMonth() + 1 // 注意getMonth从0开始，getDay()也是(此时0代表星期日)
       var nowDay = date.getDate()
       var str = nowYear + '年' + nowMonth + '月' + nowDay + '日'
+      var takeDate = nowYear + '-' + nowMonth + '-' + nowDay
+      sessionStorage.setItem('takeMainDate', JSON.stringify(takeDate))
       return str
     },
     // 点击出现popup
@@ -102,36 +105,58 @@ export default {
     // 确认当前门店
     confirm () {
       this.visible = false // 先把popup关掉
-      this.current = this.flag // 确认了当前哪个门店
+      this.current = this.flag  // 确认了当前哪个门店
+      sessionStorage.setItem('takeSelect', JSON.stringify(this.flag))
     },
     // 保存当前门店自取的信息
     save () {
       // 对当前选中的门店进行判断，如果没有选择门店就提示
-      if (!(this.current)) {
-        MessageBox('提示', '您还未选择门店地址');
+      if (!this.current && this.current !== 0) {
+        MessageBox('提示', '您还未选择门店地址')
       }
       // 对当前自取时间进行判断
       if (!(this.date && this.time)) {
-        MessageBox('提示', '您还未选择自取时间');
+        MessageBox('提示', '您还未选择自取时间')
       }
       // 把当前选择的信息封装起来，并保存
       let storeInfo = {
         'storeName': this.storeName[this.current],
-        'dateTime':  this.date + this.time 
-        }
+        'dateTime': this.date + this.time
+      }
       // 存下vuex中以及sessionStorage中
       this.$store.dispatch('saveStore', JSON.stringify(storeInfo))
-      sessionStorage.setItem('storeInfo',JSON.stringify(storeInfo))
-      sessionStorage.setItem('isSelf',true)
-      // 判断之后返回上一层
-      if ((this.current) && (this.date) && (this.time)) {
-        this.$router.go(-1);
-      }
+      sessionStorage.setItem('storeInfo', JSON.stringify(storeInfo))
+      sessionStorage.setItem('takeDate', JSON.stringify(this.date))
+      sessionStorage.setItem('takeTime', JSON.stringify(this.time))
+      sessionStorage.setItem('storeId', JSON.stringify(this.storeId[this.current]))
+
+      // 清空express数据
+      sessionStorage.removeItem('expressDate')
+      sessionStorage.removeItem('expressTime')
+
+      this.$router.push(
+        {
+          name: 'confirmorder',
+          query: {
+          ship: 'takeself'
+        }
+      })
     }
   },
   // vue加载完之后开始获取地址
   mounted () {
     this.$store.dispatch('getStoreLists')
+    // 表示当前不是第一次过来
+    if (this.$route.query.isFirst == 1) {
+      this.date = JSON.parse(sessionStorage.getItem('takeDate')) // 日期先取了
+      this.time = JSON.parse(sessionStorage.getItem('takeTime')) // 时间先取了
+      this.current = JSON.parse(sessionStorage.getItem('takeSelect'))
+   } else {
+     console.log(this.$route.query.isFirst)
+     sessionStorage.removeItem('takeSelect')
+     this.current = ''
+     console.log(this.current)
+   }
   },
   // 计算当前店铺数量
   computed: {

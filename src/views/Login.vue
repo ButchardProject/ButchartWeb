@@ -81,17 +81,19 @@ export default {
         // 验证登陆
         axios.post(config.url + '/login?tel=' + this.phone + '&code=' + this.code)
           .then(function (res) {
+            console.log(res)
             if (res.status === 200) {
               sessionStorage.setItem('phone', self.phone)
               sessionStorage.setItem('code', self.code)
               sessionStorage.setItem('token', res.data.token.id) // 保存当前token到sessionStorage
+              sessionStorage.setItem('defaultFlorist', res.data.userProfile.defaultFlorist)
               self.$store.dispatch('setUser', self.phone)
               self.$store.dispatch('saveToken', res.data.token.id) // 保存当前token到store
               self.$router.push('/')
             }
           }).catch(function (error) {
             console.log(error)
-            if (error.statusCode === 500) {
+            if (error.statusCode == 500) {
               self.errorMsg = '验证失败'
             }
           })

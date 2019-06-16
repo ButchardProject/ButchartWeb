@@ -9,8 +9,8 @@
       <li><span class="name">{{name[index]}}</span>{{tel[index]}}</li>
       <li>{{province[index]+city[index]+district[index]+street[index]}}</li>
       <li class="choose">
-        <span @click="select(item)">
-          <input class="checkbox" type="checkbox" name="checkbox" :checked="current.indexOf(item)>=0">
+        <span @click="select(index)">
+          <input class="checkbox" type="checkbox" name="checkbox" :checked="current.indexOf(index)>=0">
           <span class="checkbox-content">选择地址</span>
         </span>
         <span class="edit" @click="edit(index)">编辑</span>
@@ -89,6 +89,7 @@ export default {
       if (this.current.length) {
         // 把所有地址信息合在一起
         let currentAddress = this.province[this.current[0]] + this.city[this.current[0]] + this.district[this.current[0]] + this.street[this.current[0]]
+        sessionStorage.setItem('currentLocationId', this.locationId[this.current[0]])
         sessionStorage.setItem('current', this.current[0]) // 当前第几个地址下来
         sessionStorage.setItem('name', this.name[this.current[0]]) // 地址的用户名存在本地
         sessionStorage.setItem('currentAddress', currentAddress) // 地址信息存在本地
@@ -97,24 +98,25 @@ export default {
           {
             name: 'express',
             query: {
-              current: this.current[0]
+              current: this.current[0],
+              flag: true
             }
           })
       }
     },
     // 选择地址
-    select (item) {
+    select (index) {
       // 判断当前是否已经选中相应地址，实现单选
       // 检索当前元素是否存在
-      let checkbox = this.current.indexOf(item)
+      let checkbox = this.current.indexOf(index)
       // 元素不存在
       if (checkbox === -1) {
-        this.current.push(item) // 先往数组里面推
+        this.current.push(index) // 先往数组里面推
         this.isSure = true // 当前确认按钮修改样式
         // 遍历数组存在的元素
         for (let i = 0; i <= this.current.length; i++) {
           // 如果当前数组中存在的元素不等于现在推进来的，就是直接剔除
-          if (this.current[i] !== item) {
+          if (this.current[i] !== index) {
             this.current.splice(i, 1)
             console.log(this.current)
           }
@@ -124,7 +126,7 @@ export default {
         // 遍历数组存在的元素
         for (let i = 0; i <= this.current.length; i++) {
           // 如果当前数组中存在的元素不等于现在推进来的，就是直接剔除
-          if (this.current[i] === item) {
+          if (this.current[i] === index) {
             this.current.splice(i, 1)
           }
         }
