@@ -11,7 +11,7 @@ module.exports = {
   devServer: {
     port: 8080, // 端口号
     host: 'localhost',
-    https: false, // https:{type:Boolean}
+    https: true, // https:{type:Boolean}
     open: true // 配置自动启动浏览器
   },
   // 生产环境是否生成 sourceMap 文件，一般情况不建议打开

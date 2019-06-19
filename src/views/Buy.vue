@@ -84,8 +84,8 @@ export default {
           prevEl: '.swiper-button-prev'
         }
       },
-      badge:0, // 购物车数量
-      carInfo: [],  // 购物车里面的信息
+      badge: 0, // 购物车数量
+      carInfo: [] // 购物车里面的信息
     }
   },
   methods: {
@@ -105,14 +105,15 @@ export default {
       if (sessionStorage.getItem('phone') === null) {
         this.$router.push('login')
       } else {
-      // 把当前价格，花名，以及数量一起传递给确认订单页面
-      sessionStorage.setItem('flowerNum', this.value)
-      this.$router.push(
-        { 'name': 'confirmorder',
-          query: {
-            value: this.value
-          }
-        })
+        // 把当前价格，花名，以及数量一起传递给确认订单页面
+        sessionStorage.setItem('flowerNum', this.value)
+        this.$router.push(
+          {
+            'name': 'confirmorder',
+            query: {
+              value: this.value
+            }
+          })
       }
     },
     // 加入购物车
@@ -121,40 +122,27 @@ export default {
       if (sessionStorage.getItem('phone') === null) {
         this.$router.push('login')
       } else {
-        if (sessionStorage.getItem('unread')){
+        // 本地保存的未读数是否有，需要做区别处理
+        if (sessionStorage.getItem('unread')) {
           this.badge = parseInt(sessionStorage.getItem('unread'))
-          this.badge = this.badge + 1 
-          // 收集当前购物车信息
-          let info = {
-            "seriesId": sessionStorage.getItem('seriesId'),
-            "productId": sessionStorage.getItem('productId'),
-            "value": this.value // 当前value的数量
-          }
-          // 判断当前本地db是否存在，如果存在直接拿出来用
-          if (this.carInfo) {
-            this.carInfo = JSON.parse(sessionStorage.getItem('carInfo'))
-            // 将当前购物车的信息存到carInfo里面,用于存本地
-            this.carInfo.push(info)
-            this.$store.dispatch('getAddCar', info)
-            this.$store.dispatch('getAddUnread', this.badge)
-            sessionStorage.setItem('carInfo', JSON.stringify(this.carInfo)) // 保存当前购物车的信息到本地
-            sessionStorage.setItem('unread', this.badge) // 保存当前未读数到本地
-          }
+          this.badge = this.badge + 1
         } else {
           this.badge = this.badge + 1
-          // 收集当前购物车信息
-          let info = {
-            'seriesId': sessionStorage.getItem('seriesId'),
-            'productId': sessionStorage.getItem('productId'),
-            'value': this.value // 当前value的数量
-          }
-          // 将当前购物车的信息存到carInfo里面,用于存本地
-          this.carInfo.push(info)
-          this.$store.dispatch('getAddCar', info)
-          this.$store.dispatch('getAddUnread', this.badge)
-          sessionStorage.setItem('carInfo', JSON.stringify(this.carInfo)) // 保存当前购物车的信息到本地
-          sessionStorage.setItem('unread', this.badge) // 保存当前未读数到本地
         }
+        let that = this
+        axios.put(config.url + '/user/' + sessionStorage.getItem('phone') + '/product/' + 
+        sessionStorage.getItem('productId') + 
+        '/addToShoppingList?quantity='+ parseInt(this.value) + '&access_token=' + sessionStorage.getItem('token'))
+          .then(function (res) {
+            console.log(res)
+            if (res.status == 200) {
+              that.$store.dispatch('getAddUnread', that.badge)
+              sessionStorage.setItem('unread', that.badge)
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       }
     }
   },

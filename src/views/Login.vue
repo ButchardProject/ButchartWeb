@@ -14,7 +14,7 @@
           <!-- code -->
           <div class="div-code">
             <input type="text" v-model="code" class="input-pwd" placeholder="输入验证码" maxlength="6" oninput = "value=value.replace(/[^\d]/g,'')"/>
-          <span class="span-btn" v-on:click="sendCode()" v-bind:class="{disabled:!this.canClick}">{{content}}</span>
+          <span class="span-btn" v-on:click="sendCode()" :class="{disabled:!this.canClick}">{{content}}</span>
           </div>
           <!-- loginButton -->
           <div>
@@ -93,7 +93,7 @@ export default {
             }
           }).catch(function (error) {
             console.log(error)
-            if (error.statusCode == 500) {
+            if (error.statusCode === 500) {
               self.errorMsg = '验证失败'
             }
           })

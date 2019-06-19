@@ -162,7 +162,7 @@ export default {
   /* 购物车number */
   .number {
     background-color: #63B8FF;
-    border-radius: 25px;
+    border-radius: 1.5rem;
     line-height: 14px;
     display: inline-block;
     width: 0.7rem;

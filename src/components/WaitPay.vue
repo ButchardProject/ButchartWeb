@@ -8,13 +8,13 @@
       </div>
       <div class="div-content">
         <img class="photo" src="../assets/images/list01.png"/>
-        <span class="name">【】</span>
+        <span class="name">【{{name[index]}}】</span>
         <span class="price">¥{{price[index]}}</span>
-        <span class="number">x{{value[index]}}</span>
+        <span class="number">x{{quantity[index]}}</span>
       </div>
       <div class="div-sum">
-        共<span>{{value[index]}}</span>件商品&nbsp;&nbsp;
-        共计:¥<span>{{price[index] * value[index]}}</span>
+        共<span>{{quantity[index]}}</span>件商品&nbsp;&nbsp;
+        共计:¥<span>{{price[index] * quantity[index]}}</span>
       </div>
       <div class="confirm">
         <span class="cancel">取消</span>
@@ -24,46 +24,44 @@
   </div>
 </template>
 <script>
+import config from '@/config'
+import axios from 'axios'
 export default {
   name: 'waitpay',
   data () {
     return {
-      price: this.$store.state.carOrder.price, // 价格
-      seriesId: '', // 系列id
-      productId: '', // 产品id
-      value: [] // 当前未付款的数量
+      num: '', // 当前待付款的数量
+      name: [], // 花名
+      price: [], // 花的价格
+      quantity: [], // 购买的数量
+      productId: [] // 产品id
     }
   },
   methods: {
     getProduct () {
-      let carInfo = JSON.parse(sessionStorage.getItem('carInfo'))
-      if (carInfo) {
-        for (var i in carInfo) {
-          this.value.push(carInfo[i].value)
-          let ids = {
-            seriesId: carInfo[i].seriesId,
-            productId: carInfo[i].productId
+      let that = this
+      axios.get(config.url + '/user/' + sessionStorage.getItem('phone') + '/getShoppingList?access_token=' + sessionStorage.getItem('token'))
+        .then(function (res) {
+          console.log(res)
+          if (res.status === 200) {
+            that.num = res.data.length
+            sessionStorage.setItem('unread', that.num)
+            console.log(res.data.length)
+            for (let index in res.data) {
+              that.name.push(res.data[index].name)
+              that.price.push(res.data[index].price)
+              that.quantity.push(res.data[index].quantity)
+              that.productId.push(res.data[index].productId)
+            }
           }
-          this.$store.dispatch('getCarOrder', ids)
-        }
-      }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   },
-  mounted () {
+  created () {
     this.getProduct()
-  },
-  computed: {
-    // 待付款就根据未读来显示未处理的订单
-    num: function () {
-      if (this.$store.state.unread) {
-        return this.$store.state.unread
-      }
-      if (parseInt(sessionStorage.getItem('unread'))) {
-        return parseInt(sessionStorage.getItem('unread'))
-      } else {
-        return 0
-      }
-    }
   }
 }
 </script>
@@ -152,14 +150,14 @@ export default {
   vertical-align: top;
   font-size: 0.5rem;
   display: inline-block;
-  left: 15%;
+  left: 2rem;
 }
 /* 数量 */
 .number {
   position: relative;
   font-size: 0.5rem;
   display: inline-block;
-  left: 8%;
+  left: 1.1rem;
 }
 /* 合计价格 */
 .div-sum {
