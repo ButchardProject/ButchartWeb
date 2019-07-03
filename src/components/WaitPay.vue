@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="content" v-for="(item,index) in num" :key="index">
+    <div class="content" v-for="(item,index) in unPayed" :key="index">
       <div class="div-text">
         <!-- 选中checkbox -->
         <input class="checkbox" type="checkbox">
@@ -18,7 +18,7 @@
       </div>
       <div class="confirm">
         <span class="cancel">取消</span>
-        <span class="pay">付款</span>
+        <span class="pay" @click="pay(index)">付款</span>
       </div>
     </div>
   </div>
@@ -28,31 +28,47 @@ import config from '@/config'
 import axios from 'axios'
 export default {
   name: 'waitpay',
+  props: {
+    unPayed: {
+      type: Array,
+    }
+  },
   data () {
     return {
-      num: '', // 当前待付款的数量
       name: [], // 花名
-      price: [], // 花的价格
+      totalPrice: [], // 价格
       quantity: [], // 购买的数量
-      productId: [] // 产品id
+      price: [], // 花的单价
+      transactionsID: [] // 订单ID
     }
   },
   methods: {
-    getProduct () {
+    // 付款
+    pay (index) {
       let that = this
-      axios.get(config.url + '/user/' + sessionStorage.getItem('phone') + '/getShoppingList?access_token=' + sessionStorage.getItem('token'))
+      axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/transactionId/' + this.transactionsID[index] + '/payTransaction?access_token=' + sessionStorage.getItem('token'))
         .then(function (res) {
           console.log(res)
           if (res.status === 200) {
-            that.num = res.data.length
-            sessionStorage.setItem('unread', that.num)
-            console.log(res.data.length)
-            for (let index in res.data) {
-              that.name.push(res.data[index].name)
-              that.price.push(res.data[index].price)
-              that.quantity.push(res.data[index].quantity)
-              that.productId.push(res.data[index].productId)
-            }
+            // 如果当前已经付款的话，重新去服务器获取数据
+            axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
+              .then(function (res) {
+                console.log(res)
+                if (res.status === 200) {
+                   for (let index in res.data) {
+                      if (res.data[index].status === 'Unpayed') {
+                        for (let i = 0; i < res.data[index].length; i++) {
+                          that.name.push(res.data[index].productList[i].name)
+                          that.price.push(res.data[index].productList[i].price)
+                          that.quantity.push(res.data[index].productList[i].quantity)
+                        }
+                      }
+                    }
+                }
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
           }
         })
         .catch(function (error) {
@@ -60,8 +76,19 @@ export default {
         })
     }
   },
-  created () {
-    this.getProduct()
+  watch: {
+    unPayed (val, oldVal) {
+      if (val) {
+        for (let i = 0; i < val.length; i++) {
+          this.transactionsID.push(val[i]._id)
+          for (let j = 0; j < val[i].productList.length; j++) {
+            this.name.push(val[i].productList[j].name)
+            this.price.push(val[i].productList[j].price)
+            this.quantity.push(val[i].productList[j].quantity)
+          }
+        }
+      }
+    }
   }
 }
 </script>

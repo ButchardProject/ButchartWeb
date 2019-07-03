@@ -1,31 +1,64 @@
 <template>
-  <div class="content">
-    <div class="div-text">
+  <div>
+    <div class="content" v-for="(item,index) in afterSales" :key="index">
+      <div class="div-text">
       <!-- 选中checkbox -->
-      <input class="checkbox" type="checkbox">
-      <span class="text">交易成功</span>
-    </div>
-    <div>
-      <img class="photo" src="../assets/images/list01.png"/>
-      <span class="name">【】</span>
-      <span class="price">¥660</span>
-      <span class="number">x1</span>
-    </div>
-    <div class="div-sum">
-      共<span>100</span>件商品&nbsp;&nbsp;共计:¥
-      <span>10000</span>
-    </div>
-    <div class="confirm">
-      <span class="pay">再次购买</span>
+        <input class="checkbox" type="checkbox">
+        <span class="text">等待买家付款</span>
+      </div>
+      <div class="div-content">
+        <img class="photo" src="../assets/images/list01.png"/>
+        <span class="name">【{{name[index]}}】</span>
+        <span class="price">¥{{price[index]}}</span>
+        <span class="number">x{{quantity[index]}}</span>
+      </div>
+      <div class="div-sum">
+        共<span>{{quantity[index]}}</span>件商品&nbsp;&nbsp;
+        共计:¥<span>{{price[index] * quantity[index]}}</span>
+      </div>
+      <div class="confirm">
+        <span class="comment" @click="addComment(index)">追加评论</span>
+        <span class="pay">再次购买</span>
+      </div>
     </div>
   </div>
 </template>
 <script>
 export default {
   name: 'completed',
+  props: {
+    afterSales: {
+      type: Array
+    }
+  },
   data () {
     return {
-      
+      name: [], // 花名
+      totalPrice: [], // 价格
+      quantity: [], // 购买的数量
+      price: [], // 花的单价
+      transactionsID: [] // 订单ID
+    }
+  },
+  methods: {
+    // 追加评论
+    addComment (index) {
+      sessionStorage.setItem('comment', JSON.stringify(transactionsID[index])) // 先把当前购买的评价事务ID存下来
+      this.$router.push('/comment')
+    }
+  },
+  watch: {
+    afterSales (val, oldVal) {
+      if (val) {
+        for (let i = 0; i < val.length; i++) {
+          this.transactionsID.push(val[i]._id)
+          for (let j = 0; j < val[i].productList.length; j++) {
+            this.name.push(val[i].productList[j].name)
+            this.price.push(val[i].productList[j].price)
+            this.quantity.push(val[i].productList[j].quantity)
+          }
+        }
+      }
     }
   }
 }
@@ -137,12 +170,27 @@ export default {
   width: 95%;
   text-align: right;
 }
+/* 追加评论 */
+.comment {
+  border: 1px solid #DEDEDE;
+  line-height: 20px;
+  display: inline-block;
+  width: 25%;
+  text-align: center;
+  border-radius: 5px;
+  color: #DEDEDE;
+}
+.comment:hover {
+  border: 1px solid #63B8FF;
+  color: #63B8FF;
+}
 /* 付款按钮 */
 .pay {
+  margin-left: .4rem;
   border: 1px solid #63B8FF;
   line-height: 20px;
   display: inline-block;
-  width: 30%;
+  width: 25%;
   text-align: center;
   border-radius: 5px;
   color: #63B8FF;

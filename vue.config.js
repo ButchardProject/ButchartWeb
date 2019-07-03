@@ -8,12 +8,11 @@ module.exports = {
   assetsDir: 'static',
   // 指定生成index.html的路径，相对于（outputDir)。也可以是一个绝对路径
   indexPath: 'index.html',
-  devServer: {
-    port: 8080, // 端口号
-    host: 'localhost',
-    https: true, // https:{type:Boolean}
-    open: true // 配置自动启动浏览器
-  },
+  // devServer: {
+  //   // port: 8080, // 端口号
+  //   // host: 'localhost',
+  //   open: true // 配置自动启动浏览器
+  // },
   // 生产环境是否生成 sourceMap 文件，一般情况不建议打开
   productionSourceMap: false
 }

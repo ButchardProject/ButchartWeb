@@ -27,7 +27,7 @@
 <script>
 import config from '@/config'
 import axios from 'axios'
-
+import { MessageBox } from 'mint-ui'
 export default {
   name: 'login',
   data () {
@@ -38,8 +38,7 @@ export default {
       errorMsg: '', //  错误提示
       content: '获取验证码', //  内容
       totalTime: 60, //  时长
-      canClick: true, //  添加canClick
-      operation: '' //  告知服务器当前请求
+      canClick: true //  添加canClick
     }
   },
   methods: {
@@ -49,33 +48,34 @@ export default {
         this.errorMsg = '您输入的手机号码有误'
         return
       }
-      if (!this.canClick) { }
-      this.operation = 'register'//  注册请求
-      this.canClick = false
-      this.content = this.totalTime + 's后重新发送'
-      let clock = window.setInterval(() => {
-        this.totalTime--
-        this.content = this.totalTime + 's后重新发送'
-        if (this.totalTime < 0) {
-          window.clearInterval(clock)
-          this.content = '重新发送'
-          this.totalTime = 10
-          this.canClick = true //  这里重新开启
-        }
-      }, 1000)
+      let that = this
       // 发起http请求获取验证码
-      axios.post(config.url + '/sendMessage/' + this.phone + '?operation=' + this.operation)
+      axios.post(config.url + '/sendMessage/' + this.phone + '?operation=register')
         .then(function (res) {
           console.log(res)
           console.log(res.data)
+          if (!that.canClick) { }
+          that.canClick = false
+          that.content = that.totalTime + 's后重新发送'
+          let clock = window.setInterval(() => {
+            that.totalTime--
+            that.content = that.totalTime + 's后重新发送'
+            if (that.totalTime < 0) {
+              window.clearInterval(clock)
+              that.content = '重新发送'
+              that.totalTime = 10
+              that.canClick = true //  这里重新开启
+            }
+          }, 1000)
         })
         .catch(function (error) {
-          console.log(error)
+          MessageBox('提示', '发送失败,code:' + error.response.status)
         })
     },
     // 请求登陆
     submit () {
       if (!(this.phone && this.code)) {
+        this.errorMsg = '请填写正确的手机号与验证码'
       } else {
         let self = this // then方法内部不能使用Vue的实例化this，在内部this没有被绑定
         // 验证登陆
@@ -83,19 +83,23 @@ export default {
           .then(function (res) {
             console.log(res)
             if (res.status === 200) {
-              sessionStorage.setItem('phone', self.phone)
-              sessionStorage.setItem('code', self.code)
+              let userInfo = {
+                'phone': self.phone,
+                'code': self.code,
+              }
+              sessionStorage.setItem('userInfo', JSON.stringify(userInfo))
               sessionStorage.setItem('token', res.data.token.id) // 保存当前token到sessionStorage
-              sessionStorage.setItem('defaultFlorist', res.data.userProfile.defaultFlorist)
+              if (res.data.userProfile.defaultFlorist) { // 判断服务器会不会给我默认的，有了在存
+                sessionStorage.setItem('defaultFlorist', res.data.userProfile.defaultFlorist)
+              }
+              self.$store.dispatch('getAddUnread', res.data.shoppingCart.length) // 更新购物车未读数
               self.$store.dispatch('setUser', self.phone)
               self.$store.dispatch('saveToken', res.data.token.id) // 保存当前token到store
               self.$router.push('/')
             }
           }).catch(function (error) {
             console.log(error)
-            if (error.statusCode === 500) {
-              self.errorMsg = '验证失败'
-            }
+            MessageBox('登陆失败', '请检查手机号与验证码是否正确')
           })
       }
     }

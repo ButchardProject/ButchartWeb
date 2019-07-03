@@ -37,7 +37,7 @@
         <div class="title">时间选择</div>
         <span @click="chooseDate()">日期 {{date}}</span>
         <mt-datetime-picker type="date" ref="datePicker" @confirm="handleDateConfirm"
-            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日">
+            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" :startDate="startDate">
             </mt-datetime-picker>
         <span @click="chooseTime()">时间 {{time}}</span>
         <mt-datetime-picker ref="timePicker" type="time" @confirm="handleTimeConfirm">
@@ -69,6 +69,7 @@ export default {
       visible: false, // popup的显示
       flag: '', // 中转index
       current: '', // 当前选中的门店
+      startDate: new Date() // 当前日期
     }
   },
   methods: {
@@ -77,7 +78,11 @@ export default {
       this.$refs.datePicker.open()
     },
     chooseTime () {
-      this.$refs.timePicker.open()
+      if (this.date === '') {
+        MessageBox('提示', '请选择送达日期')
+      } else {
+        this.$refs.timePicker.open()
+      }
     },
     // 获取日期
     handleDateConfirm (data) {
@@ -105,7 +110,7 @@ export default {
     // 确认当前门店
     confirm () {
       this.visible = false // 先把popup关掉
-      this.current = this.flag  // 确认了当前哪个门店
+      this.current = this.flag // 确认了当前哪个门店
       sessionStorage.setItem('takeSelect', JSON.stringify(this.flag))
     },
     // 保存当前门店自取的信息
@@ -118,45 +123,44 @@ export default {
       if (!(this.date && this.time)) {
         MessageBox('提示', '您还未选择自取时间')
       }
-      // 把当前选择的信息封装起来，并保存
-      let storeInfo = {
-        'storeName': this.storeName[this.current],
-        'dateTime': this.date + this.time
-      }
-      // 存下vuex中以及sessionStorage中
-      this.$store.dispatch('saveStore', JSON.stringify(storeInfo))
-      sessionStorage.setItem('storeInfo', JSON.stringify(storeInfo))
-      sessionStorage.setItem('takeDate', JSON.stringify(this.date))
-      sessionStorage.setItem('takeTime', JSON.stringify(this.time))
-      sessionStorage.setItem('storeId', JSON.stringify(this.storeId[this.current]))
-
-      // 清空express数据
-      sessionStorage.removeItem('expressDate')
-      sessionStorage.removeItem('expressTime')
-
-      this.$router.push(
-        {
-          name: 'confirmorder',
-          query: {
-          ship: 'takeself'
+      if (this.date && this.time && this.current || this.current === 0) {
+        // 把当前选择的信息封装起来，并保存
+        let storeInfo = {
+          'storeId': this.storeId[this.current],
+          'storeName': this.storeName[this.current],
+          'dateTime': this.date + this.time
         }
-      })
+        // 存下vuex中以及sessionStorage中
+        this.$store.dispatch('saveStore', JSON.stringify(storeInfo))
+        sessionStorage.setItem('storeInfo', JSON.stringify(storeInfo))
+        sessionStorage.setItem('takeDate', JSON.stringify(this.date))
+        sessionStorage.setItem('takeTime', JSON.stringify(this.time))
+        // 清空express数据
+        sessionStorage.removeItem('expressDate')
+        sessionStorage.removeItem('expressTime')
+        this.$router.push(
+          {
+            name: 'confirmorder',
+            query: {
+              ship: 'takeself'
+            }
+          })
+      }
     }
   },
   // vue加载完之后开始获取地址
   mounted () {
     this.$store.dispatch('getStoreLists')
     // 表示当前不是第一次过来
-    if (this.$route.query.isFirst == 1) {
+    if (this.$route.query.isFirst === 1) {
       this.date = JSON.parse(sessionStorage.getItem('takeDate')) // 日期先取了
       this.time = JSON.parse(sessionStorage.getItem('takeTime')) // 时间先取了
       this.current = JSON.parse(sessionStorage.getItem('takeSelect'))
-   } else {
-     console.log(this.$route.query.isFirst)
-     sessionStorage.removeItem('takeSelect')
-     this.current = ''
-     console.log(this.current)
-   }
+    } else {
+      console.log(this.$route.query.isFirst)
+      sessionStorage.removeItem('takeSelect')
+      this.current = ''
+    }
   },
   // 计算当前店铺数量
   computed: {

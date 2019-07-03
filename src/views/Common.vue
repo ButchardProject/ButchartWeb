@@ -29,7 +29,8 @@ export default {
       price: this.$store.state.product.productPrice, // 价格
       desc: this.$store.state.product.productDesc, // 花描述
       index: this.$route.query.id, // 当前第几个index
-      productId: this.$store.state.product.productId // 当前productId
+      productId: this.$store.state.product.productId, // 当前productId
+      type: this.$store.state.product.productType // 当前productType
     }
   },
   // 在vue加载完之后在去请求
@@ -51,12 +52,20 @@ export default {
             index: index
           }
         })
+      let flowerInfo = {
+        'productId': (this.productId)[index],
+        'flowerName': (this.name)[index],
+        'price': (this.price)[index],
+        'desc': (this.desc)[index],
+        'type': (this.type)[index]
+      }
+      sessionStorage.setItem('currentFlowerInfo', JSON.stringify(flowerInfo))
       // 把当前花的名称，价格以及描述存到sessionStorage里面
-      sessionStorage.setItem('flowerName', (this.name)[index])
-      sessionStorage.setItem('price', (this.price)[index])
-      sessionStorage.setItem('desc', (this.desc)[index])
-      sessionStorage.setItem('index', index)
-      sessionStorage.setItem('productId', (this.productId)[index])
+      // sessionStorage.setItem('flowerName', (this.name)[index])
+      // sessionStorage.setItem('price', (this.price)[index])
+      // sessionStorage.setItem('desc', (this.desc)[index])
+      // sessionStorage.setItem('index', index)
+      // sessionStorage.setItem('productId', (this.productId)[index])
     }
   },
   computed: {

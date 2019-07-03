@@ -23,6 +23,28 @@ export default {
       win.addEventListener(resizeEvt, recalc, false)
       doc.addEventListener('DOMContentLoaded', recalc, false)
     })(document, window)
+  },
+  watch: {
+    // '$router': beforeEach((to, from, next) => { //to:即将前往的页面,from:从哪个页面来,next:下一步操作
+    //   console.log(to.meta.requireAuth)
+    //   console.log(sessionStorage.getItem('userInfo'))
+    //   if (to.meta.requireAuth) {
+    //     //判断该路由是否需要登录权限
+    //     if (sessionStorage.getItem('userInfo')) {
+    //         //通过封装好的cookies读取token，如果存在，name接下一步如果不存在，那跳转回登录页
+    //         next()//不要在next里面加"path:/",会陷入死循环
+    //     }
+    //     else {
+    //         next({
+    //             path: '/login',
+    //             query: {redirect: to.fullPath}//将跳转的路由path作为参数，登录成功后跳转到该路由
+    //         })
+    //     }
+    // }
+    // else {
+    //     next()
+    // }
+    // })
   }
 }
 </script>

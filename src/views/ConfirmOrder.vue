@@ -17,11 +17,11 @@
     </div>
     <!-- 订单行 -->
     <div class="div-order">
-      <div class="order-info">
+      <div class="order-info" v-for="(item,index) in cart" :key="index">
         <img src="../assets/images/list01.png"/>
-        <span class="info-name">【{{name}}】</span>
-        <span class="info-number">x{{value}}</span>
-        <span class="info-price">¥{{price}}</span>
+        <span class="info-name">【{{item.flowerName}}】</span>
+        <span class="info-number">x{{item.flowerNum}}</span>
+        <span class="info-price">¥{{item.price}}</span>
       </div>
       <hr>
       <!-- 数量 -->
@@ -41,15 +41,16 @@
       </div>
       <div class="div-mode-discount">
           <span class="mode-discount-name">店铺优惠</span>
-          <span class="mode-discount-common">></span>
+          <span class="mode-discount-common" v-if="delivery">{{favour}}</span>
+          <span class="mode-discount-common" v-else>></span>
       </div>
       <hr>
       <div class="div-text">
         <span>买家留言：</span>
         <textarea type="text" placeholder="是否需要卡片，卡片内容等（限制30个字）" rows="3" cols="40" maxlength="30" v-model="comment"></textarea>
       </div>
-      <div class="div-sum">共<span>{{value}}</span>件商品&nbsp;&nbsp;共计:
-        <span>{{total}}元</span>
+      <div class="div-sum">共<span>{{totalNum}}</span>件商品&nbsp;&nbsp;共计:
+        <span>{{totalPrice}}元</span>
       </div>
     </div>
     <!-- 确定支付button -->
@@ -62,147 +63,248 @@
 import config from '@/config'
 import axios from 'axios'
 import { MessageBox } from 'mint-ui'
-import { setTimeout } from 'timers';
+import { setTimeout } from 'timers'
 export default {
   name: 'confirmorder',
   data () {
     return {
-      phone: sessionStorage.getItem('phone'), // 紧急手机号
+      phone: JSON.parse(sessionStorage.getItem('userInfo')).phone, // 紧急手机号
       errorMsg: '', // 错误提示
-      value: parseInt(sessionStorage.getItem('flowerNum')), // 购物车数量,从订单页面传递过来
-      name: sessionStorage.getItem('flowerName'), // 花名
-      price: parseInt(sessionStorage.getItem('price')), // 价格
+      cart: JSON.parse(sessionStorage.getItem('cart')), // 购物车信息
       isSelf: false, // 是否是自取
       isExpress: false, // 是否是配送
       ship: '', // 配送方式
       delivery: false, // 根据配送方式显示
-      money: parseInt(this.$route.query.money), // 运费
-      total: '', // 总的价格
       floristId: [], // 花艺师的ID
       floristName: [], // 花艺师的username
-      currentFloristId: sessionStorage.getItem('defaultFlorist'), // 当前花艺师
-      comment: ''  // 备注
+      currentFloristId: '', // 当前花艺师
+      isFlorist: false, // 是否有花艺师
+      comment: '', // 备注
+      totalNum: 0, // 所有数量
+      totalPrice: 0, // 所有价格
+      deliveryMethod: [], // 配送方案
+      freight: '', // 运费
+      type: [], // 当前购物产品的类型
+      favour: '' // 减免
     }
   },
   // 页面创建前先去获取一把花艺师
   created () {
+    this.getTotal() // 获取当前购物车的数量和总价
+    // 获取登陆之后是否有默认的花艺师
+    if (sessionStorage.getItem('defaultFlorist')) {
+      this.isFlorist = true
+      this.currentFloristId = sessionStorage.getItem('defaultFlorist')
+    }
+    // 获取花艺师
     let that = this
     axios.get(config.url + '/getFlorists?access_token=' + sessionStorage.getItem('token'))
-          .then(function (res) {
-            console.log(res.data)
-            for (let index in res.data) {
-              that.floristId.push(res.data[index].florist._id) // 先把花艺师的id推进去
-              that.floristName.push(res.data[index].username) // 花艺师的name推进去
-            }
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
+      .then(function (res) {
+        // console.log(res.data)
+        for (let index in res.data) {
+          that.floristId.push(res.data[index].florist._id) // 先把花艺师的id推进去
+          that.floristName.push(res.data[index].username) // 花艺师的name推进去
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
   },
   mounted () {
-    this.total = this.value * this.price // 表明当前总价
-    // 判断当前配送方式
-    if (this.$route.query.ship) {
-      this.delivery = true
-      let ship = this.$route.query.ship
-      if (ship === 'takeself') {
-        this.isSelf = true
-        this.isExpress = false
-        this.ship = '到店自取'
-      } else {
-        this.isSelf = false
-        this.isExpress = true
-        this.ship = '快递配送 ' + this.money + '¥'
-        this.total += this.money
+    if (this.totalPrice) {
+      // 判断当前配送方式
+      if (this.$route.query.ship) {
+        this.delivery = true
+        let ship = this.$route.query.ship
+        // 自取
+        if (ship === 'takeself') {
+          this.isSelf = true
+          this.isExpress = false
+          this.ship = '到店自取'
+          this.favour = '>'
+        } else {
+          // 顺丰
+          this.isSelf = false
+          this.isExpress = true
+          // 是否是省内
+          if (this.$route.query.isInside) {
+            this.freight = 20
+          } else {
+            this.freight = 30
+          }
+          // 是否需要打折
+          let discount = JSON.parse(sessionStorage.getItem('discount'))
+          let discountPrice
+          // 从购物车里面获取type
+          for (let i = 0; i < this.type.length; i++) {
+            if (this.type[i] === '伴手礼') {
+              discountPrice = parseInt(discount.discountOther) // 折扣价
+            } else {
+              discountPrice = parseInt(discount.discountNormal)
+            }
+          }
+          // 当前展示文本
+          this.ship = '快递配送 ' + this.freight + '¥'
+          this.favour = '伴手礼减免' + discountPrice + '¥'
+          this.totalPrice = this.totalPrice + this.freight + discountPrice
+        }
       }
     }
   },
   methods: {
+    // 计算当前总数量与总价
+    getTotal () {
+      if (this.cart) {
+        for (let i = 0; i < this.cart.length; i++) {
+          this.totalNum += parseInt(this.cart[i].flowerNum)
+          this.totalPrice += parseInt(this.cart[i].flowerNum) * parseInt(this.cart[i].price)
+          this.type.push(this.cart[i].type)
+        }
+      }
+    },
     // 选择花艺师
     selectFlorist (event) {
       this.currentFloristId = event.target.value
+      if (this.currentFloristId == 'default') {
+        this.isFlorist = false
+      } else {
+        this.isFlorist = true
+      }
     },
     // 确认支付操作
     confirmPay () {
-      let that = this
-      // 自取
-      if (this.$route.query.ship === 'takeself') {
-        let orderParams = JSON.stringify({
-          // 花品
-          'productList': [
-            {
-              'productId': (sessionStorage.getItem('productId')), // 花品id
-              'price': parseInt(sessionStorage.getItem('price')), // 花的价格
-              'quantity': this.value, // 添加数量
+      if (!this.ship) {
+        MessageBox('提示', '当前配送方式未选择')
+      } else {
+        let that = this
+        let productList = []
+        let orderParams
+        // 自取
+        if (this.$route.query.ship === 'takeself') {
+          for (let i = 0; i < JSON.parse(sessionStorage.getItem('cart')).length; i++) {
+            let info = JSON.parse(sessionStorage.getItem('cart')) // 先把下单的东西捞出来
+            let list = {
+              'productId': info[i].productId,
+              'name': info[i].flowerName,
+              'price': info[i].price,
+              'quantity': info[i].flowerNum
             }
-          ],
-          'storeId': JSON.parse(sessionStorage.getItem('storeId')), // 店铺id
-          'totalPrice': parseInt(this.total), // 价格
-          'floristId': this.currentFloristId, // 花艺师id
-          'logistics': {
-            'deliveryMethod': '自取',
-            'freight': parseInt(this.money),
-          },
-          'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
-          'comment': this.comment
-        })
-        axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
-          headers: {
-            'Content-Type': 'application/json'
+            productList.push(list)
           }
-        })
-          .then(function (res) {
+          if (this.isFlorist) {
+            orderParams = JSON.stringify({
+              // 花品
+              'productList': productList,
+              'storeId': JSON.parse(sessionStorage.getItem('storeInfo')).storeId, // 店铺id
+              'totalPrice': this.totalPrice, //  价格
+              'floristId': this.currentFloristId, // 花艺师id
+              'logistics': {
+                'deliveryMethod': '自取',
+                'freight': 0
+              },
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+              'comment': this.comment
+            })
+          } else {
+            orderParams = JSON.stringify({
+              // 花品
+              'productList': productList,
+              'storeId': JSON.parse(sessionStorage.getItem('storeInfo')).storeId, // 店铺id
+              'totalPrice': this.totalPrice, //  价格
+              'logistics': {
+                'deliveryMethod': '自取',
+                'freight': 0
+              },
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+              'comment': this.comment
+            })
+          }
+          axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(function (res) {
             console.log(res)
             console.log(res.data)
             if (res.status === 200) {
               MessageBox('提示', '支付成功')
+              setTimeout(function () {
+                that.$router.push({
+                  'name': 'allorder',
+                  query: {
+                    'selected': '3'
+                  }
+                })
+                sessionStorage.removeItem('cart')
+                sessionStorage.removeItem('unread')
+              }, 1000)
             }
-          })
-          .catch(function (error) {
+          }).catch(function (error) {
             console.log(error)
           })
-      } else { //  快递配送
-        let orderParams = JSON.stringify({
-          // 花品
-          'productList': [
-            {
-              'productId': (sessionStorage.getItem('productId')), // 花品id
-              'price': parseInt(sessionStorage.getItem('price')), // 花的价格
-              'quantity': this.value, // 添加数量
+        } else { //  快递配送
+          for (let i = 0; i < JSON.parse(sessionStorage.getItem('cart')).length; i++) {
+            let info = JSON.parse(sessionStorage.getItem('cart'))
+            let list = {
+              'productId': info[i].productId,
+              'name': info[i].flowerName,
+              'price': info[i].price,
+              'quantity': info[i].flowerNum
             }
-          ],
-          'addressId': sessionStorage.getItem('currentLocationId'), // 地址id
-          'totalPrice': parseInt(this.total), // 价格
-          'floristId': this.currentFloristId, // 花艺师id
-          'logistics': {
-            'deliveryMethod': '顺丰',
-            'freight': parseInt(this.money),
-          },
-          'expectedDeliverDate': JSON.parse(sessionStorage.getItem('expressMainDate')) + JSON.parse(sessionStorage.getItem('expressTime')),
-          'comment': this.comment
-        })
-        axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
-          headers: {
-            'Content-Type': 'application/json'
+            productList.push(list)
           }
-        }).then(function (res) {
-          console.log(res)
-          console.log(res.data)
-          if (res.status === 200) {
-            MessageBox('提示', '支付成功')
-            setTimeout(function(){
-              that.$router.push({
-                'name': 'allorder',
-                query: {
-                  'selected': '3'
-                }
-              })
-            },1000)
+          if (this.isFlorist) {
+            orderParams = JSON.stringify({
+              // 花品
+              'productList': productList,
+              'storeId': JSON.parse(sessionStorage.getItem('storeInfo')).storeId, // 店铺id
+              'totalPrice': this.totalPrice, //  价格
+              'floristId': this.currentFloristId, // 花艺师id
+              'logistics': {
+                'deliveryMethod': '自取',
+                'freight': 0
+              },
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+              'comment': this.comment
+            })
+          } else {
+            orderParams = JSON.stringify({
+              // 花品
+              'productList': productList,
+              'storeId': JSON.parse(sessionStorage.getItem('storeInfo')).storeId, // 店铺id
+              'totalPrice': this.totalPrice, //  价格
+              'logistics': {
+                'deliveryMethod': '自取',
+                'freight': 0
+              },
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+              'comment': this.comment
+            })
           }
-        })
-          .catch(function (error) {
+          axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(function (res) {
+            console.log(res)
+            console.log(res.data)
+            if (res.status === 200) {
+              MessageBox('提示', '支付成功')
+              setTimeout(function () {
+                that.$router.push({
+                  'name': 'allorder',
+                  query: {
+                    'selected': '3'
+                  }
+                })
+              }, 1000)
+              sessionStorage.removeItem('cart')
+              sessionStorage.removeItem('unread')
+            }
+          }).catch(function (error) {
             console.log(error)
           })
+        }
       }
     },
     // 格式化日期
@@ -352,7 +454,7 @@ export default {
 /* 外部的div订单信息，整个body */
 .div-order {
     padding: 3% 12% 0 5%;
-    padding-bottom: 7%;/* 增加底部div的padding，防止fixed的button挡住 */
+    padding-bottom: 2rem;/* 增加底部div的padding，防止fixed的button挡住 */
 }
 /* 内部的div订单信息 */
 .order-info {
@@ -451,7 +553,7 @@ textarea {
   background-color: #F8F8FF;
   position: fixed;
   bottom: 0;
-  line-height:35px;
+  line-height:1.5rem;
   text-align: center;
 }
 /* 确认支付button */

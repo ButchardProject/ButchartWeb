@@ -30,7 +30,7 @@
              </li>
             <li>
                 <span class="property">门牌号</span>
-                <input type="text" v-model="address" placeholder="例：水印城A座8楼801室"/>
+                <input type="text" v-model="street" placeholder="例：水印城A座8楼801室"/>
             </li>
         </ul>
     </div>
@@ -51,10 +51,11 @@ export default {
     return {
       name: '', // 姓名
       phone: '', // 手机号
-      address: '', // 详细地址
+      street: '', // 详细地址
       popupVisible: false, // 控制popup展示和隐藏
       flag: false, // 控制显示地址
       items: [{ name: '先生', checked: false }, { name: '女士', checked: false }], // label中显示的值以及状态
+      sex: '', // 性别
       // slot
       myAddressSlots: [
         {
@@ -89,23 +90,31 @@ export default {
       myAddressProvince: '省',
       myAddressCity: '市',
       district: '区/县',
-      // 从location页面编辑过来的数据
-      receiveData: {
-        index: this.$route.query.index,
-        tel: this.$route.query.tel,
-        name: this.$route.query.name,
-        province: this.$route.query.province,
-        city: this.$route.query.city,
-        district: this.$route.query.district,
-        street: this.$route.query.street,
-        flag: this.$route.query.flag
-      }
+      locationId: ''
     }
   },
   mounted () {
     // 解析传递过来的信息
-    if (!this.receiveData.index) {
-      this.handleInfo(this.receiveData)
+    if (sessionStorage.getItem('editLocation')) {
+      let editInfo = JSON.parse(sessionStorage.getItem('editLocation'))
+      this.locationId = editInfo.locationId
+      this.phone = editInfo.tel
+      this.name = editInfo.name
+      this.myAddressProvince = editInfo.province
+      this.myAddressCity = editInfo.city
+      this.district = editInfo.district
+      this.street = editInfo.street
+      this.flag = editInfo.flag
+      this.sex = editInfo.sex
+      if (this.sex == '先生') {
+        this.items[0].checked = true
+        this.items[1].checked = false
+      } else {
+        this.items[0].checked = false
+        this.items[1].checked = true
+      }
+      // 数据全部获取完，在删除
+      sessionStorage.removeItem('editLocation')
     }
   },
   methods: {
@@ -115,10 +124,12 @@ export default {
         case 0 :
           this.items[index].checked = true
           this.items[index + 1].checked = false
+          this.sex = '先生'
           break
         case 1 :
           this.items[index].checked = true
           this.items[index - 1].checked = false
+          this.sex = '女士'
       }
     },
     // 省市区联动，获取数组中的数据
@@ -146,73 +157,68 @@ export default {
         return
       }
       // 均不允许为空
-      if (!(this.phone && this.name && this.address && (this.items[0].checked || this.items[1].checked))) {
+      if (!(this.phone && this.name && this.street && (this.items[0].checked || this.items[1].checked))) {
         MessageBox('提示', '请填写正确资料')
       } else {
-        // 防止刷新之后当前vuex中的数据没了
-        if (this.$store.state.user.phone !== '') {
+        // then中无法访问this对象
+        let self = this
+        // 区分是编辑还是新增
+        if (this.$route.query.index) {
           // 转成json
           let addressData = JSON.stringify(
-            {
-              'name': this.name,
-              'province': this.myAddressProvince,
-              'city': this.myAddressCity,
-              'district': this.district,
-              'tel': this.phone,
-              'street': this.address,
-              'postcode': 'string',
-              'isDefault': 'true'
-            })
+          {
+            '_id': this.locationId,
+            'name': this.name,
+            'sex': this.sex,
+            'province': this.myAddressProvince,
+            'city': this.myAddressCity,
+            'district': this.district,
+            'tel': this.phone,
+            'street': this.street,
+            'postcode': 'string',
+            'isDefault': true
+          })
           // 请求服务器
-          axios.put(config.url + '/user/' + this.$store.state.user.phone + '/addAddress?access_token=' + sessionStorage.getItem('token'), addressData)
-            .then(function (res) {
-              console.log(res)
-              if (res.status === 200) {
-                this.$router.push('location')
-              }
-            }).catch(function (error) {
-              console.log(error)
-            })
-        } else {
-          let addressData = JSON.stringify(
-            {
-              'name': this.name,
-              'province': this.myAddressProvince,
-              'city': this.myAddressCity,
-              'district': this.district,
-              'tel': this.phone,
-              'street': this.address,
-              'postcode': 'string',
-              'isDefault': 'true'
-            })
-          // then中无法访问this对象
-          let self = this
-          // 添加请求header
-          axios.put(config.url + '/user/' + sessionStorage.getItem('phone') + '/addAddress?access_token=' + sessionStorage.getItem('token'), addressData, {
+          axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/modifyAddress?access_token=' + sessionStorage.getItem('token'), addressData, {
             headers: {
               'Content-Type': 'application/json'
             }
+          }).then(function (res) {
+            console.log('update:>'+res)
+            if (res.status === 200) {
+              self.$router.push('location')
+            }
+          }).catch(function (error) {
+            console.log(error)
           })
-            .then(function (res) {
-              console.log(res)
-              if (res.status === 200) {
-                self.$router.push('location')
-              }
-            }).catch(function (error) {
-              console.log(error)
-            })
+        } else {
+          let addressData = JSON.stringify(
+          {
+            'name': this.name,
+            'sex': this.sex,
+            'province': this.myAddressProvince,
+            'city': this.myAddressCity,
+            'district': this.district,
+            'tel': this.phone,
+            'street': this.street,
+            'postcode': 'string',
+            'isDefault': true
+          })
+          // 添加请求header
+          axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/addAddress?access_token=' + sessionStorage.getItem('token'), addressData, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(function (res) {
+            console.log(res)
+            if (res.status === 200) {
+              self.$router.push('location')
+            }
+          }).catch(function (error) {
+            console.log(error)
+          })
         }
       }
-    },
-    // 处理编辑页传递过来的信息
-    handleInfo (receiveData) {
-      this.flag = receiveData.flag
-      this.name = receiveData.name
-      this.phone = receiveData.tel
-      this.myAddressProvince = receiveData.province
-      this.myAddressCity = receiveData.city
-      this.district = receiveData.district
-      this.address = receiveData.street
     }
   }
 }

@@ -43,7 +43,10 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "manager" */ './views/Manager.vue')
+      component: () => import(/* webpackChunkName: "manager" */ './views/Manager.vue'),
+      meta: {
+        requireAuth: true
+      }
     },
     {
       path: '/location',
@@ -62,6 +65,14 @@ export default new Router({
       component: () => import(/* webpackChunkName: "addlocation" */ './views/AddLocation.vue')
     },
     {
+      path: '/mycart',
+      name: 'mycart',
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import(/* webpackChunkName: "mycart" */ './views/MyCart.vue')
+    },
+    {
       path: '/confirmorder',
       name: 'confirmorder',
       // route level code-splitting
@@ -75,10 +86,7 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "takeself" */ './views/TakeSelf.vue'),
-      meta: {
-        keepAlive: true
-      }
+      component: () => import(/* webpackChunkName: "takeself" */ './views/TakeSelf.vue')
     },
     {
       path: '/express',
@@ -117,6 +125,14 @@ export default new Router({
           component: () => import(/* webpackChunkName: "completed" */ './components/Completed.vue')
         }
       ]
+    },
+    {
+      path: '/comment',
+      name: 'comment',
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import(/* webpackChunkName: "comment" */ './views/Comment.vue')
     }
   ]
 })

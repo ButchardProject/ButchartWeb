@@ -43,16 +43,16 @@
   </div>
 </template>
 <script>
-import { MessageBox , Actionsheet } from 'mint-ui'
+import { MessageBox } from 'mint-ui'
 export default {
   name: 'manager',
   data () {
     return {
-      name: sessionStorage.getItem('phone'), // 用户昵称
+      name: JSON.parse(sessionStorage.getItem('userInfo')).phone, // 用户昵称
       actions: [{
         name: '拍照',
         method: this.getCamera() // 打开摄像头
-      },{
+      }, {
         name: '从相册中选择',
         method: this.getLibray() // 从相册中获取
       }],
@@ -94,12 +94,10 @@ export default {
     },
     // 打开摄像头
     getCamera () {
-      
     },
     // 打开相册
     getLibray () {
-
-    },
+    }
   }
 }
 </script>
@@ -194,7 +192,7 @@ export default {
   padding: 1% 0;
   display: flex;
   justify-content: space-around;
-  line-height: 35px;
+  line-height: 1.2rem;
 }
 /* 底部logo图片 */
 .f-img {

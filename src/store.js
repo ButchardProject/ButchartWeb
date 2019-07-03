@@ -24,7 +24,8 @@ export default new Vuex.Store({
       productName: [], // 系列产品的名称
       productPrice: [], // 系列产品的价格
       productDesc: [], // 系列产品的描述
-      productNum: '' // 系列产品的数量
+      productNum: '', // 系列产品的数量
+      productType: [] // 系列产品的类型
     },
     opened: false, // nav默认关闭
     // 店铺
@@ -51,7 +52,7 @@ export default new Vuex.Store({
       value: [] // 当前系列产品的数量
     },
     // 未读
-    unread: '', // 购物车未读
+    unread: 0, // 购物车未读
     // 所有订单信息
     carOrder: {
       price: []
@@ -75,7 +76,7 @@ export default new Vuex.Store({
     },
     saveToken (state, token) {
       state.token = token
-      console.log(token)
+      // console.log(token)
     },
     // 添加鲜花系列
     increment (state, data) {
@@ -89,6 +90,7 @@ export default new Vuex.Store({
       state.product.productName.push(data.name)
       state.product.productDesc.push(data.description)
       state.product.productPrice.push(data.price)
+      state.product.productType.push(data.type)
     },
     // 获取系列产品的数量
     addSeriesNum (state, num) {
@@ -145,7 +147,7 @@ export default new Vuex.Store({
     },
     // 异步请求花的信息
     getProducts (context) {
-      axios.get(config.url + '/getProductSeries?access_token=' + sessionStorage.getItem('token'))
+      axios.get(config.url + '/getProductSeries')
         .then((res) => {
           console.log(res)
           for (let data in res.data) {
@@ -158,7 +160,7 @@ export default new Vuex.Store({
       // 先判断当前是否有id，如果没有id，则从sessionStorage去获取
       if (context.state.seriesId.length < 1) {
         var sidArray = sessionStorage.getItem('seriesId')
-        axios.get(config.url + '/seriesId/' + sidArray + '/getProductsBySeries?access_token=' + sessionStorage.getItem('token'))
+        axios.get(config.url + '/seriesId/' + sidArray + '/getProductsBySeries')
           .then((res) => {
             context.commit('addSeriesNum', res.data.length)
             for (let data in res.data) {
@@ -168,7 +170,7 @@ export default new Vuex.Store({
       } else {
         // 有当前的seriesId，直接去服务器请求
         sessionStorage.setItem('seriesId', (context.state.seriesId)[index])
-        axios.get(config.url + '/seriesId/' + (context.state.seriesId)[index] + '/getProductsBySeries?access_token=' + sessionStorage.getItem('token'))
+        axios.get(config.url + '/seriesId/' + (context.state.seriesId)[index] + '/getProductsBySeries')
           .then((res) => {
             context.commit('addSeriesNum', res.data.length)
             for (let data in res.data) {

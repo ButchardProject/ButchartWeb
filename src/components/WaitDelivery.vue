@@ -1,22 +1,21 @@
 <template>
-  <div class="content">
-    <div class="div-text">
-      <!-- 选中checkbox -->
-      <input class="checkbox" type="checkbox">
-      <span class="text">买家已付款</span>
-    </div>
-    <div class="div-content">
-      <img class="photo" src="../assets/images/list01.png"/>
-      <span class="name">【{{name}}】</span>
-      <span class="price">¥660</span>
-      <span class="number">x1</span>
-    </div>
-    <div class="div-sum">
-      共<span>100</span>件商品&nbsp;&nbsp;共计:¥
-      <span>10000</span>
-    </div>
-    <div class="confirm">
-      <span class="pay" @click="tipSend()">提醒发货</span>
+  <div>
+    <div class="content" v-for="(item,index) in payed" :key="index">
+      <div class="div-text">
+        <!-- 选中checkbox -->
+        <input class="checkbox" type="checkbox">
+        <span class="text">买家已付款</span>
+      </div>
+      <div class="div-content">
+        <img class="photo" src="../assets/images/list01.png"/>
+        <span class="name">【{{name[index]}}】</span>
+        <span class="price">¥{{price[index]}}</span>
+        <span class="number">x{{quantity[index]}}</span>
+      </div>
+      <div class="div-sum">
+        共<span>x{{quantity[index]}}</span>件商品&nbsp;&nbsp;
+        共计:¥<span>{{price[index] * quantity[index]}}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -24,15 +23,32 @@
 import { MessageBox } from 'mint-ui'
 export default {
   name: 'waitdelivery',
-  data () {
-    return {
-      name: sessionStorage.getItem('flowerName')
+  props: {
+    payed: {
+      type: Array,
     }
   },
-  methods: {
-    // 提醒发货
-    tipSend () {
-      
+  data () {
+    return {
+      name: [], // 花名
+      totalPrice: [], // 价格
+      quantity: [], // 购买的数量
+      price: [], // 花的单价
+      transactionsID: [] // 订单ID
+    }
+  },
+  watch: {
+    payed (val, oldVal) {
+      if (val) {
+        for (let i = 0; i < val.length; i++) {
+          this.transactionsID.push(val[i]._id)
+          for (let j = 0; j < val[i].productList.length; j++) {
+            this.name.push(val[i].productList[j].name)
+            this.price.push(val[i].productList[j].price)
+            this.quantity.push(val[i].productList[j].quantity)
+          }
+        }
+      }
     }
   }
 }
@@ -138,20 +154,5 @@ export default {
   line-height: 30px;
   font-size: 0.5rem;
   padding-bottom: 1%;
-}
-/* 操作栏 */
-.confirm {
-  width: 95%;
-  text-align: right;
-}
-/* 付款按钮 */
-.pay {
-  border: 1px solid #63B8FF;
-  line-height: 20px;
-  display: inline-block;
-  width: 30%;
-  text-align: center;
-  border-radius: 5px;
-  color: #63B8FF;
 }
 </style>

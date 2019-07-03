@@ -42,8 +42,7 @@ export default {
       isActive: false, // 是否需要渲染flag
       current: '', // 当前选中的li元素
       title: '', // 当前title显示信息
-      flag: false, // 存储当前title信息
-      selected: '2' // 传递到allorder的值
+      flag: false // 存储当前title信息
     }
   },
   // 在vue创建之前先获取
@@ -75,9 +74,7 @@ export default {
     },
     // 前往个人中心
     go () {
-      console.log('store', this.$store.state.user.phone)
-      console.log('local', sessionStorage.getItem('phone'))
-      if (this.$store.state.user.phone === '' && sessionStorage.getItem('phone') === null) {
+      if (this.$store.state.user.phone === '' && JSON.parse(sessionStorage.getItem('userInfo')) === null) {
         this.$router.push('login')
       } else {
         this.$router.push('manager')
@@ -85,24 +82,19 @@ export default {
     },
     // 前往购物未读
     to () {
-      if (this.$store.state.user.phone === '' && sessionStorage.getItem('phone') === null) {
+      if (this.$store.state.user.phone === '' && JSON.parse(sessionStorage.getItem('userInfo')) === null) {
         this.$router.push('login')
       } else {
-        this.$router.push({
-          name: 'allorder',
-          query: {
-            selected: this.selected
-          }
-        })
+        this.$router.push('/mycart')
       }
     }
   },
+  // 计算当前未读的属性
   computed: {
     badge: function () {
       if (this.$store.state.unread) {
         return this.$store.state.unread
-      }
-      if (sessionStorage.getItem('unread')) {
+      } else if (sessionStorage.getItem('unread')) {
         return parseInt(sessionStorage.getItem('unread'))
       } else {
         return 0

@@ -35,6 +35,7 @@ export default {
       tip: '请添加你的收货地址', // 如果没有收货地址就提示用户
       tel: [],
       name: [],
+      sex: [],
       province: [],
       city: [],
       district: [],
@@ -53,7 +54,7 @@ export default {
     // 获取地址列表
     getAddressList () {
       let self = this
-      axios.get(config.url + '/user/' + sessionStorage.getItem('phone') + '/getAddress?access_token=' + sessionStorage.getItem('token'))
+      axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getAddress?access_token=' + sessionStorage.getItem('token'))
         .then((res) => {
           console.log(res)
           // 获取的数据量先存起来
@@ -61,6 +62,7 @@ export default {
           if (self.name.length) {
             self.name = []
             self.tel = []
+            self.sex = []
             self.province = []
             self.city = []
             self.district = []
@@ -70,13 +72,13 @@ export default {
           for (let index in res.data) {
             self.locationId.push(res.data[index]._id)
             self.name.push(res.data[index].name)
+            self.sex.push(res.data[index].sex)
             self.tel.push(res.data[index].tel)
             self.province.push(res.data[index].province)
             self.city.push(res.data[index].city)
             self.district.push(res.data[index].district)
             self.street.push(res.data[index].street)
           }
-          sessionStorage.setItem('locationId', JSON.stringify(self.locationId))
         })
     },
     // 添加新地址
@@ -89,10 +91,14 @@ export default {
       if (this.current.length) {
         // 把所有地址信息合在一起
         let currentAddress = this.province[this.current[0]] + this.city[this.current[0]] + this.district[this.current[0]] + this.street[this.current[0]]
-        sessionStorage.setItem('currentLocationId', this.locationId[this.current[0]])
-        sessionStorage.setItem('current', this.current[0]) // 当前第几个地址下来
-        sessionStorage.setItem('name', this.name[this.current[0]]) // 地址的用户名存在本地
-        sessionStorage.setItem('currentAddress', currentAddress) // 地址信息存在本地
+        // 当前确认地址的信息
+        let addressInfo = {
+          'currentLocationId': this.locationId[this.current[0]],
+          'name': this.name[this.current[0]],
+          'sex': this.sex[this.current[0]],
+          'currentAddress': currentAddress
+        }
+        sessionStorage.setItem('addressInfo', JSON.stringify(addressInfo))
         // 前往快递页面
         this.$router.push(
           {
@@ -149,11 +155,11 @@ export default {
           console.log(error)
         })
       } else {
-        axios.delete(config.url + '/user/' + sessionStorage.getItem('phone') +
+        axios.delete(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone +
         '/deleteAddress?access_token=' + sessionStorage.getItem('token'),
         {
           data: [
-            JSON.parse(sessionStorage.getItem('locationId'))[index]
+            (this.locationId)[index]
           ]
         }).then(function (res) {
           self.getAddressList()
@@ -164,18 +170,23 @@ export default {
     },
     // 编辑地址
     edit (index) {
+      let editInfo = JSON.stringify({
+        'locationId': (this.locationId)[index],
+        'name': (this.name)[index],
+        'sex': (this.sex)[index],
+        'tel': (this.tel)[index],
+        'province': (this.province)[index],
+        'city': (this.city)[index],
+        'district': (this.district)[index],
+        'street': (this.street)[index],
+        'flag': true
+      })
+      sessionStorage.setItem('editLocation', editInfo)
       this.$router.push(
         {
           name: 'addlocation',
           query: {
             index: index,
-            name: (this.name)[index],
-            tel: (this.tel)[index],
-            province: (this.province)[index],
-            city: (this.city)[index],
-            district: (this.district)[index],
-            street: (this.street)[index],
-            flag: true
           }
         })
     }

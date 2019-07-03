@@ -5,7 +5,6 @@
     <Navigation/>
     <div :class="['div-swiper', opened ? 'div-swiper-open' : 'div-swiper-close']">
         <swiper :options="swiperOption" class="swiper">
-      <!-- @someSwiperEvent="callback" -->
         <!-- slides -->
         <swiper-slide v-for="(item,index) in banner_list" v-bind:key="index">
           <img v-bind:src="item.img" class="img"/>
@@ -64,11 +63,13 @@ export default {
   data () {
     return {
       banner_list: config.imgList, // banner的图片集合
-      price: sessionStorage.getItem('price'), // 花价
-      name: sessionStorage.getItem('flowerName'), // 花名
+      productId: '', // id
+      price: '', // 花价
+      name: '', // 花名
       day: 1, // 提前预定天数
       value: 1, // 当前添加的数量
-      detail: sessionStorage.getItem('desc'), // 描述
+      detail: '', // 描述
+      type: '', // 类型
       swiperOption: {
         centeredSlides: true,
         autoplay: {
@@ -84,9 +85,17 @@ export default {
           prevEl: '.swiper-button-prev'
         }
       },
-      badge: 0, // 购物车数量
-      carInfo: [] // 购物车里面的信息
+      badge: 0 // 购物车数量
     }
+  },
+  // 在页面创建的时候去获取前面页面过来的数据
+  created () {
+    let flowerInfo = JSON.parse(sessionStorage.getItem('currentFlowerInfo'))
+    this.name = flowerInfo.flowerName
+    this.price = flowerInfo.price
+    this.detail = flowerInfo.desc
+    this.productId = flowerInfo.productId
+    this.type = flowerInfo.type
   },
   methods: {
     // 添加当前花数量
@@ -102,11 +111,20 @@ export default {
     },
     // 立即购买
     buyNow () {
-      if (sessionStorage.getItem('phone') === null) {
+      if (JSON.parse(sessionStorage.getItem('userInfo')) === null) {
         this.$router.push('login')
       } else {
         // 把当前价格，花名，以及数量一起传递给确认订单页面
-        sessionStorage.setItem('flowerNum', this.value)
+        let cart = []
+        // 保存当前购买信息
+        cart.push({
+          'productId': this.productId,
+          'flowerName': this.name,
+          'price': this.price,
+          'flowerNum': this.value,
+          'type': this.type
+        })
+        sessionStorage.setItem('cart', JSON.stringify(cart))
         this.$router.push(
           {
             'name': 'confirmorder',
@@ -119,7 +137,7 @@ export default {
     // 加入购物车
     addCar () {
       // 先判断是否登录
-      if (sessionStorage.getItem('phone') === null) {
+      if (JSON.parse(sessionStorage.getItem('userInfo')) === null) {
         this.$router.push('login')
       } else {
         // 本地保存的未读数是否有，需要做区别处理
@@ -130,12 +148,12 @@ export default {
           this.badge = this.badge + 1
         }
         let that = this
-        axios.put(config.url + '/user/' + sessionStorage.getItem('phone') + '/product/' + 
-        sessionStorage.getItem('productId') + 
-        '/addToShoppingList?quantity='+ parseInt(this.value) + '&access_token=' + sessionStorage.getItem('token'))
+        axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/product/' +
+        JSON.parse(sessionStorage.getItem('currentFlowerInfo')).productId +
+        '/addToShoppingList?quantity=' + parseInt(this.value) + '&access_token=' + sessionStorage.getItem('token'))
           .then(function (res) {
             console.log(res)
-            if (res.status == 200) {
+            if (res.status === 200) {
               that.$store.dispatch('getAddUnread', that.badge)
               sessionStorage.setItem('unread', that.badge)
             }

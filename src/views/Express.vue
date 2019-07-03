@@ -3,7 +3,7 @@
     <div class="express-content">
         <div class="address">
           <span class="title">地址选择</span>
-          <span v-if="flag" class="currentAddress" @click="selectAddress()">{{address}} {{tel}}</span>
+          <span v-if="flag" class="currentAddress" @click="selectAddress()">{{name}} {{address}}</span>
           <span v-else class="choose" @click="selectAddress()">请选择</span>
         </div>
         <hr style="height:1px;border: none;border-top:1px solid #ddd;margin:15px 0;"/>
@@ -16,15 +16,16 @@
         <hr style="height:1px;border: none;border-top:1px solid #ddd;margin:15px 0;"/>
         <div class="express-price">
             <span class="title">运费计算:</span>
-            <span class="title">{{money}}¥</span>
+            <span v-if="isInside" class="title">¥{{normal}}</span>
+            <span v-else class="title">¥{{other}}</span>
         </div>
         <hr style="height:1px;border: none;border-top:1px solid #ddd;margin:15px 0;"/>
         <div class="store-time">
         <div class="title">送达时间</div>
         <span @click="chooseDate()">日期 {{date}}</span>
         <mt-datetime-picker type="date" ref="datePicker" @confirm="handleDateConfirm"
-            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日">
-            </mt-datetime-picker>
+            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" :startDate="startDate">
+        </mt-datetime-picker>
         <span @click="chooseTime()">时间 {{time}}</span>
         <mt-datetime-picker ref="timePicker" type="time" @confirm="handleTimeConfirm">
         </mt-datetime-picker>
@@ -38,17 +39,54 @@
 </template>
 <script>
 import { MessageBox } from 'mint-ui'
+import config from '@/config'
+import axios from 'axios'
 export default {
   name: 'express',
   data () {
     return {
       date: '', // 日期
       time: '', // 时间
-      money: 20, // 当前运费
+      normal: 0, // 省内正常运费
+      other: 0, // 其他运费
+      isInside: true, // 是否省内
       flag: false, // 当前是否显示已选择
       address: '',
-      tel: sessionStorage.getItem('currentTel')
+      name: '',
+      discountNormal: '', // 花束价格
+      discountOther: '', // 伴手礼价格
+      isNormal: true, // 花束是正常，伴手礼是不正常的
+      startDate: new Date() // 当前日期
     }
+  },
+  created () {
+    this.handleAddress() // 处理地址
+    // 获取运费地址
+    let that = this
+    axios.get(config.url + '/getDeliveryMethods?access_token=' + sessionStorage.getItem('token'), {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(function (res) {
+      console.log(res.data)
+      if (res.status === 200) {
+        for (let index in res.data) {
+          if (res.data[index].deliveryMethod === '顺丰') {
+            that.other = res.data[index].freight.其他 // 获取其他省份的运费
+            that.normal = res.data[index].freight.浙江省
+            that.discountNormal = res.data[index].config.discount.花束
+            that.discountOther = res.data[index].config.discount.伴手礼
+            let discount = JSON.stringify({
+              'discountNormal': that.discountNormal,
+              'discountOther': that.discountOther
+            })
+            sessionStorage.setItem('discount', discount)
+          }
+        }
+      }
+    }).catch(function (error) {
+      console.log(error)
+    })
   },
   mounted () {
     this.handleMoney() // 处理当前费用
@@ -63,7 +101,11 @@ export default {
       this.$refs.datePicker.open()
     },
     chooseTime () {
-      this.$refs.timePicker.open()
+      if (this.date === '') {
+        MessageBox('提示', '请选择送达日期')
+      } else {
+        this.$refs.timePicker.open()
+      }
     },
     // 获取日期
     handleDateConfirm (data) {
@@ -83,15 +125,22 @@ export default {
       sessionStorage.setItem('expressMainDate', JSON.stringify(expressDate))
       return str
     },
+    // 处理当前地址
+    handleAddress () {
+      if (sessionStorage.getItem('addressInfo')) {
+        let addressInfo = JSON.parse(sessionStorage.getItem('addressInfo'))
+        this.address = addressInfo.currentAddress
+        this.name = addressInfo.name
+      }
+    },
     // 处理当前的快递费用,
     handleMoney () {
       // 如果没有的话，我就不去变更，地址的UI
       if (this.$route.query.flag) {
         this.flag = this.$route.query.flag
-        this.address = sessionStorage.getItem('currentAddress')
         // 如果不是浙江区域的，运费就为30¥
         if (this.address.substring(0, 2) !== '浙江') {
-          this.money = 30
+          this.isInside = false
         }
       }
       // 表示当前不是第一次过来
@@ -99,40 +148,41 @@ export default {
         this.date = JSON.parse(sessionStorage.getItem('expressDate')) // 日期先取了
         this.time = JSON.parse(sessionStorage.getItem('expressTime')) // 时间先取了
         this.flag = true
-        this.address = sessionStorage.getItem('currentAddress')
         // 如果不是浙江区域的，运费就为30¥
         if (this.address.substring(0, 2) !== '浙江') {
-          this.money = 30
+          this.isInside = false
         }
       }
     },
     // 保存当前门店自取的信息
     save () {
-      // 对当前选中的门店进行判断，如果没有选择门店就提示
+    // 对当前选中的门店进行判断，如果没有选择门店就提示
       if (!(this.address)) {
         MessageBox('提示', '您还未选择收货地址')
+        return
       }
-      // 对当前自取时间进行判断
       if (!(this.date && this.time)) {
+        // 对当前自取时间进行判断
         MessageBox('提示', '您还未选择配送时间')
+        return
       }
-      sessionStorage.setItem('expressDate', JSON.stringify(this.date))
-      sessionStorage.setItem('expressTime', JSON.stringify(this.time))
-      // 存下vuex中以及sessionStorage中
-
-      // 清空self数据
-      sessionStorage.removeItem('takeDate')
-      sessionStorage.removeItem('takeTime')
-      sessionStorage.removeItem('takeSelect')
-      // 判断之后返回上一层
-      this.$router.push(
-        {
-          name: 'confirmorder',
-          query: {
-            ship: 'express',
-            money: this.money
-          }
-        })
+      if (this.address && this.date && this.time) {
+        sessionStorage.setItem('expressDate', JSON.stringify(this.date))
+        sessionStorage.setItem('expressTime', JSON.stringify(this.time))
+        // 清空self数据
+        sessionStorage.removeItem('takeDate')
+        sessionStorage.removeItem('takeTime')
+        sessionStorage.removeItem('takeSelect')
+        // 判断之后返回上一层
+        this.$router.push(
+          {
+            name: 'confirmorder',
+            query: {
+              ship: 'express',
+              isInside: this.isInside
+            }
+          })
+      }
     }
   }
 }
