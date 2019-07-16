@@ -202,20 +202,20 @@ export default {
                 'deliveryMethod': '自取',
                 'freight': 0
               },
-              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + '' + JSON.parse(sessionStorage.getItem('takeTime')),
               'comment': this.comment
             })
           } else {
             orderParams = JSON.stringify({
               // 花品
               'productList': productList,
-              'storeId': JSON.parse(sessionStorage.getItem('storeInfo')).storeId, // 店铺id
+              'addressId': JSON.parse(sessionStorage.getItem('addressInfo')).currentLocationId, // 快递地址
               'totalPrice': this.totalPrice, //  价格
               'logistics': {
                 'deliveryMethod': '自取',
                 'freight': 0
               },
-              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + '' + JSON.parse(sessionStorage.getItem('takeTime')),
               'comment': this.comment
             })
           }
@@ -264,7 +264,7 @@ export default {
                 'deliveryMethod': '自取',
                 'freight': 0
               },
-              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')),
               'comment': this.comment
             })
           } else {
@@ -277,7 +277,7 @@ export default {
                 'deliveryMethod': '自取',
                 'freight': 0
               },
-              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + JSON.parse(sessionStorage.getItem('takeTime')),
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')),
               'comment': this.comment
             })
           }

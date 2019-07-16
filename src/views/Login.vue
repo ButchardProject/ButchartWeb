@@ -95,7 +95,7 @@ export default {
               self.$store.dispatch('getAddUnread', res.data.shoppingCart.length) // 更新购物车未读数
               self.$store.dispatch('setUser', self.phone)
               self.$store.dispatch('saveToken', res.data.token.id) // 保存当前token到store
-              self.$router.push('/')
+              self.$router.push('/index')
             }
           }).catch(function (error) {
             console.log(error)

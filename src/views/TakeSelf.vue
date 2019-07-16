@@ -97,6 +97,12 @@ export default {
       var nowYear = date.getFullYear()
       var nowMonth = date.getMonth() + 1 // 注意getMonth从0开始，getDay()也是(此时0代表星期日)
       var nowDay = date.getDate()
+      if(nowMonth >= 1 && nowMonth <= 9) {
+        nowMonth = '0' + nowMonth
+      }
+      if(nowDay >= 0 && nowDay <= 9) {
+        nowDay = '0' + nowDay
+      }
       var str = nowYear + '年' + nowMonth + '月' + nowDay + '日'
       var takeDate = nowYear + '-' + nowMonth + '-' + nowDay
       sessionStorage.setItem('takeMainDate', JSON.stringify(takeDate))
@@ -128,7 +134,7 @@ export default {
         let storeInfo = {
           'storeId': this.storeId[this.current],
           'storeName': this.storeName[this.current],
-          'dateTime': this.date + this.time
+          'dateTime': this.date + '' + this.time
         }
         // 存下vuex中以及sessionStorage中
         this.$store.dispatch('saveStore', JSON.stringify(storeInfo))

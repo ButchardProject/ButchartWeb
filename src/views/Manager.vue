@@ -62,7 +62,7 @@ export default {
   methods: {
     // 前往主页
     home () {
-      this.$router.push('/')
+      this.$router.push('/index')
     },
     /* 修改头像 */
     editIcon () {

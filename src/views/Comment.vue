@@ -85,16 +85,15 @@ export default {
           return false
         }
         this.imgLen++; // 当前数量增加
-        //创建一个reader
+        // 创建一个reader
         let self = this
         let reader = new FileReader()
-        //将图片转成base64格式
+        // 将图片转成base64格式
         reader.readAsDataURL(this.files[i])
-        //读取成功后的回调
-        reader.onloadend = function(e) {
+        // 读取成功后的回调
+        reader.onloadend = function (e) {
           self.imgcode.push(e.target.result)
         }
-        console.log(this.imgcode)
       }
     },
     // 删除图片

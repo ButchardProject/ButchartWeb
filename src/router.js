@@ -4,12 +4,12 @@ import Index from './views/Index.vue'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
     {
-      path: '/',
+      path: '/index',
       name: 'index',
       component: Index
     },
@@ -27,7 +27,17 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "buy" */ './views/Buy.vue')
+      component: () => import(/* webpackChunkName: "buy" */ './views/Buy.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'common') {
+          next()
+        } else {
+          next('/index')
+        }
+      }
     },
     {
       path: '/common',
@@ -35,7 +45,17 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "common" */ './views/Common.vue')
+      component: () => import(/* webpackChunkName: "common" */ './views/Common.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'index') {
+          next()
+        } else {
+          next('/index')
+        }
+      }
     },
     {
       path: '/manager',
@@ -54,7 +74,17 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "location" */ './views/Location.vue')
+      component: () => import(/* webpackChunkName: "location" */ './views/Location.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'express') {
+          next()
+        } else {
+          next('/index')
+        }
+      }
     },
     {
       path: '/addlocation',
@@ -62,7 +92,17 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "addlocation" */ './views/AddLocation.vue')
+      component: () => import(/* webpackChunkName: "addlocation" */ './views/AddLocation.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'location') {
+          next()
+        } else {
+          next('/index')
+        }
+      }
     },
     {
       path: '/mycart',
@@ -70,7 +110,10 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "mycart" */ './views/MyCart.vue')
+      component: () => import(/* webpackChunkName: "mycart" */ './views/MyCart.vue'),
+      meta: {
+        requireAuth: true
+      }
     },
     {
       path: '/confirmorder',
@@ -78,7 +121,17 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "confirmorder" */ './views/ConfirmOrder.vue')
+      component: () => import(/* webpackChunkName: "confirmorder" */ './views/ConfirmOrder.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'buy') {
+          next()
+        } else {
+          next('/index')
+        }
+      }
     },
     {
       path: '/takeself',
@@ -86,7 +139,17 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "takeself" */ './views/TakeSelf.vue')
+      component: () => import(/* webpackChunkName: "takeself" */ './views/TakeSelf.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'confirmorder') {
+          next()
+        } else {
+          next('/index')
+        }
+      }
     },
     {
       path: '/express',
@@ -94,7 +157,17 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "takeself" */ './views/Express.vue')
+      component: () => import(/* webpackChunkName: "takeself" */ './views/Express.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'confirmorder') {
+          next()
+        } else {
+          next('/index')
+        }
+      }
     },
     {
       path: '/allorder',
@@ -103,6 +176,9 @@ export default new Router({
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import(/* webpackChunkName: "allOrder" */ './views/AllOrder.vue'),
+      meta: {
+        requireAuth: true
+      },
       children: [
         {
           path: 'waitpay',
@@ -132,7 +208,42 @@ export default new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "comment" */ './views/Comment.vue')
+      component: () => import(/* webpackChunkName: "comment" */ './views/Comment.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'allorder') {
+          next()
+        } else {
+          next('/allorder?selected=5')
+        }
+      }
+
     }
   ]
+})
+
+export default router
+
+// to:即将前往的页面,from:从哪个页面来,next:下一步操作
+router.beforeEach((to, from, next) => {
+  console.log(from)
+  if (to.matched.some(record => record.meta.requireAuth)) {
+    console.log('需要登录')
+    // 判断该路由是否需要登录权限
+    if (sessionStorage.getItem('userInfo')) {
+      //  通过封装好的cookies读取token，如果存在，name接下一步如果不存在，那跳转回登录页
+      next() // 不要在next里面加"path:/",会陷入死循环
+    } else {
+      next({
+        path: '/login',
+        query: {
+          redirect: to.fullPath
+        } // 将跳转的路由path作为参数，登录成功后跳转到该路由
+      })
+    }
+  } else {
+    next()
+  }
 })
