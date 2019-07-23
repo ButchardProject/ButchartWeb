@@ -62,12 +62,11 @@ export default {
   methods: {
     // 前往主页
     home () {
-      this.$router.push('/index')
+      this.$router.push('/')
     },
     /* 修改头像 */
     editIcon () {
       this.sheetVisible = true
-      console.log('1')
     },
     // 个人设置
     editName () {
@@ -79,7 +78,6 @@ export default {
         } else {
           this.name = value // 更新到本地，但是没有更新到云端
           MessageBox.alert('修改成功')
-          console.log(value)
         }
       })
     },

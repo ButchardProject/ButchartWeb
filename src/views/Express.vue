@@ -21,13 +21,10 @@
         </div>
         <hr style="height:1px;border: none;border-top:1px solid #ddd;margin:15px 0;"/>
         <div class="store-time">
-        <div class="title">送达时间</div>
+        <div class="title">送达日期</div>
         <span @click="chooseDate()">日期 {{date}}</span>
         <mt-datetime-picker type="date" ref="datePicker" @confirm="handleDateConfirm"
             year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" :startDate="startDate">
-        </mt-datetime-picker>
-        <span @click="chooseTime()">时间 {{time}}</span>
-        <mt-datetime-picker ref="timePicker" type="time" @confirm="handleTimeConfirm">
         </mt-datetime-picker>
       </div>
     </div>
@@ -46,7 +43,6 @@ export default {
   data () {
     return {
       date: '', // 日期
-      time: '', // 时间
       normal: 0, // 省内正常运费
       other: 0, // 其他运费
       isInside: true, // 是否省内
@@ -111,10 +107,6 @@ export default {
     handleDateConfirm (data) {
       this.date = this.getDate(data)
     },
-    // 获取时间
-    handleTimeConfirm (data) {
-      this.time = data
-    },
     // 处理日期
     getDate (date) {
       var nowYear = date.getFullYear()
@@ -152,7 +144,6 @@ export default {
       // 表示当前不是第一次过来
       if (this.$route.query.isFirst === 1) {
         this.date = JSON.parse(sessionStorage.getItem('expressDate')) // 日期先取了
-        this.time = JSON.parse(sessionStorage.getItem('expressTime')) // 时间先取了
         this.flag = true
         // 如果不是浙江区域的，运费就为30¥
         if (this.address.substring(0, 2) !== '浙江') {
@@ -167,17 +158,15 @@ export default {
         MessageBox('提示', '您还未选择收货地址')
         return
       }
-      if (!(this.date && this.time)) {
+      if (!(this.date)) {
         // 对当前自取时间进行判断
         MessageBox('提示', '您还未选择配送时间')
         return
       }
-      if (this.address && this.date && this.time) {
+      if (this.address && this.date) {
         sessionStorage.setItem('expressDate', JSON.stringify(this.date))
-        sessionStorage.setItem('expressTime', JSON.stringify(this.time))
         // 清空self数据
         sessionStorage.removeItem('takeDate')
-        sessionStorage.removeItem('takeTime')
         sessionStorage.removeItem('takeSelect')
         // 判断之后返回上一层
         this.$router.push(

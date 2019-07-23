@@ -112,7 +112,7 @@ export default {
     },
     // 前往主页
     home () {
-      this.$router.push('/index')
+      this.$router.push('/')
     },
     manager () {
       this.$router.push('/manager')

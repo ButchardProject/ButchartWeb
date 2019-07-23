@@ -17,7 +17,8 @@ let config = {
 
 let otherConfig = {
   // 请求的header
-  url: 'https://47.102.96.102:4000/api/WorkspaceFacadeAPIs/workspace'
+  // url: 'https://47.102.96.102:4000/api/WorkspaceFacadeAPIs/workspace'
+  url: 'https://www.thebutchart.cn:4000/api/WorkspaceFacadeAPIs/workspace'
 }
 
 config = Object.assign(config, otherConfig)

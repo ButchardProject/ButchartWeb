@@ -9,7 +9,7 @@ const router = new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: '/index',
+      path: '/',
       name: 'index',
       component: Index
     },
@@ -35,7 +35,7 @@ const router = new Router({
         if (from.name === 'common') {
           next()
         } else {
-          next('/index')
+          next('/')
         }
       }
     },
@@ -53,7 +53,7 @@ const router = new Router({
         if (from.name === 'index') {
           next()
         } else {
-          next('/index')
+          next('/')
         }
       }
     },
@@ -82,7 +82,7 @@ const router = new Router({
         if (from.name === 'express') {
           next()
         } else {
-          next('/index')
+          next('/')
         }
       }
     },
@@ -100,7 +100,7 @@ const router = new Router({
         if (from.name === 'location') {
           next()
         } else {
-          next('/index')
+          next('/')
         }
       }
     },
@@ -126,10 +126,10 @@ const router = new Router({
         requireAuth: true
       },
       beforeEnter: (to, from, next) => {
-        if (from.name === 'buy') {
+        if (from.name === 'buy' || from.name === 'express' || from.name === 'takeself') {
           next()
         } else {
-          next('/index')
+          next('/')
         }
       }
     },
@@ -147,7 +147,7 @@ const router = new Router({
         if (from.name === 'confirmorder') {
           next()
         } else {
-          next('/index')
+          next('/')
         }
       }
     },
@@ -162,10 +162,10 @@ const router = new Router({
         requireAuth: true
       },
       beforeEnter: (to, from, next) => {
-        if (from.name === 'confirmorder') {
+        if (from.name === 'confirmorder' || from.name === 'location') {
           next()
         } else {
-          next('/index')
+          next('/')
         }
       }
     },
@@ -228,9 +228,8 @@ export default router
 
 // to:即将前往的页面,from:从哪个页面来,next:下一步操作
 router.beforeEach((to, from, next) => {
-  console.log(from)
+  // console.log(from)
   if (to.matched.some(record => record.meta.requireAuth)) {
-    console.log('需要登录')
     // 判断该路由是否需要登录权限
     if (sessionStorage.getItem('userInfo')) {
       //  通过封装好的cookies读取token，如果存在，name接下一步如果不存在，那跳转回登录页

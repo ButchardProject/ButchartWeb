@@ -121,7 +121,8 @@ export default {
           this.isSelf = true
           this.isExpress = false
           this.ship = '到店自取'
-          this.favour = '>'
+          this.favour = '即享原花价9折优惠'
+          this.totalPrice = this.totalPrice * 0.9 + this.freight
         } else {
           // 顺丰
           this.isSelf = false
@@ -139,14 +140,17 @@ export default {
           for (let i = 0; i < this.type.length; i++) {
             if (this.type[i] === '伴手礼') {
               discountPrice = parseInt(discount.discountOther) // 折扣价
+              // 当前展示文本
+              this.ship = '快递配送 ' + this.freight + '¥'
+              this.favour = '伴手礼减免' + discountPrice + '¥'
+              this.totalPrice = this.totalPrice + this.freight + discountPrice
             } else {
               discountPrice = parseInt(discount.discountNormal)
+              this.ship = '快递配送 ' + this.freight + '¥'
+              this.favour = '即享原花价9折优惠'
+              this.totalPrice = this.totalPrice * 0.9 + this.freight + discountPrice
             }
           }
-          // 当前展示文本
-          this.ship = '快递配送 ' + this.freight + '¥'
-          this.favour = '伴手礼减免' + discountPrice + '¥'
-          this.totalPrice = this.totalPrice + this.freight + discountPrice
         }
       }
     }
@@ -179,6 +183,7 @@ export default {
         let that = this
         let productList = []
         let orderParams
+        let userId = this.phone
         // 自取
         if (this.$route.query.ship === 'takeself') {
           for (let i = 0; i < JSON.parse(sessionStorage.getItem('cart')).length; i++) {
@@ -202,7 +207,7 @@ export default {
                 'deliveryMethod': '自取',
                 'freight': 0
               },
-              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + '' + JSON.parse(sessionStorage.getItem('takeTime')),
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + ' ' + JSON.parse(sessionStorage.getItem('takeTime')),
               'comment': this.comment
             })
           } else {
@@ -215,7 +220,7 @@ export default {
                 'deliveryMethod': '自取',
                 'freight': 0
               },
-              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + '' + JSON.parse(sessionStorage.getItem('takeTime')),
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + ' ' + JSON.parse(sessionStorage.getItem('takeTime')),
               'comment': this.comment
             })
           }
@@ -225,8 +230,14 @@ export default {
             }
           }).then(function (res) {
             console.log(res)
-            console.log(res.data)
-            if (res.status === 200) {
+            console.log(res.data.createdId)
+            // 支付订单
+            axios.put(config.url + '/user/' + userId + '/transactionId/' + res.data.createdId + '/payTransaction?access_token=' + sessionStorage.getItem('token'), {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }).then(function (res) {
+              console.log(res)
               MessageBox('提示', '支付成功')
               setTimeout(function () {
                 that.$router.push({
@@ -238,7 +249,9 @@ export default {
                 sessionStorage.removeItem('cart')
                 sessionStorage.removeItem('unread')
               }, 1000)
-            }
+            }).catch(function (error) {
+              console.log(error)
+            })
           }).catch(function (error) {
             console.log(error)
           })
@@ -287,8 +300,14 @@ export default {
             }
           }).then(function (res) {
             console.log(res)
-            console.log(res.data)
-            if (res.status === 200) {
+            console.log(res.data.createdId)
+            // 支付订单
+            axios.put(config.url + '/user/' + userId + '/transactionId/' + res.data.createdId + '/payTransaction?access_token=' + sessionStorage.getItem('token'), {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }).then(function (res) {
+              console.log(res)
               MessageBox('提示', '支付成功')
               setTimeout(function () {
                 that.$router.push({
@@ -297,10 +316,12 @@ export default {
                     'selected': '3'
                   }
                 })
+                sessionStorage.removeItem('cart')
+                sessionStorage.removeItem('unread')
               }, 1000)
-              sessionStorage.removeItem('cart')
-              sessionStorage.removeItem('unread')
-            }
+            }).catch(function (error) {
+              console.log(error)
+            })
           }).catch(function (error) {
             console.log(error)
           })
@@ -506,10 +527,6 @@ hr {
   display: inline-block;
   width: 50%;
   text-align: right;
-}
-/* 选择靠右 */
-select {
-  direction: rtl;
 }
 /* 配送及优惠方式区域 */
 .div-mode-discount {

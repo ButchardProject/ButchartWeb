@@ -143,7 +143,6 @@ export default {
         sessionStorage.setItem('takeTime', JSON.stringify(this.time))
         // 清空express数据
         sessionStorage.removeItem('expressDate')
-        sessionStorage.removeItem('expressTime')
         this.$router.push(
           {
             name: 'confirmorder',
