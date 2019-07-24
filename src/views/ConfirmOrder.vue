@@ -169,7 +169,7 @@ export default {
     // 选择花艺师
     selectFlorist (event) {
       this.currentFloristId = event.target.value
-      if (this.currentFloristId == 'default') {
+      if (this.currentFloristId === 'default') {
         this.isFlorist = false
       } else {
         this.isFlorist = true
@@ -214,7 +214,7 @@ export default {
             orderParams = JSON.stringify({
               // 花品
               'productList': productList,
-              'addressId': JSON.parse(sessionStorage.getItem('addressInfo')).currentLocationId, // 快递地址
+              'storeId': JSON.parse(sessionStorage.getItem('storeInfo')).storeId, // 店铺id
               'totalPrice': this.totalPrice, //  价格
               'logistics': {
                 'deliveryMethod': '自取',
@@ -229,15 +229,12 @@ export default {
               'Content-Type': 'application/json'
             }
           }).then(function (res) {
-            console.log(res)
-            console.log(res.data.createdId)
             // 支付订单
             axios.put(config.url + '/user/' + userId + '/transactionId/' + res.data.createdId + '/payTransaction?access_token=' + sessionStorage.getItem('token'), {
               headers: {
                 'Content-Type': 'application/json'
               }
             }).then(function (res) {
-              console.log(res)
               MessageBox('提示', '支付成功')
               setTimeout(function () {
                 that.$router.push({
@@ -270,27 +267,27 @@ export default {
             orderParams = JSON.stringify({
               // 花品
               'productList': productList,
-              'storeId': JSON.parse(sessionStorage.getItem('storeInfo')).storeId, // 店铺id
+              'addressId': JSON.parse(sessionStorage.getItem('addressInfo')).currentLocationId, // 快递地址
               'totalPrice': this.totalPrice, //  价格
               'floristId': this.currentFloristId, // 花艺师id
               'logistics': {
-                'deliveryMethod': '自取',
+                'deliveryMethod': '快递',
                 'freight': 0
               },
-              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')),
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('expressDate')),
               'comment': this.comment
             })
           } else {
             orderParams = JSON.stringify({
               // 花品
               'productList': productList,
-              'storeId': JSON.parse(sessionStorage.getItem('storeInfo')).storeId, // 店铺id
+              'addressId': JSON.parse(sessionStorage.getItem('addressInfo')).currentLocationId, // 快递地址
               'totalPrice': this.totalPrice, //  价格
               'logistics': {
-                'deliveryMethod': '自取',
+                'deliveryMethod': '快递',
                 'freight': 0
               },
-              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')),
+              'expectedDeliverDate': JSON.parse(sessionStorage.getItem('expressDate')),
               'comment': this.comment
             })
           }
@@ -307,7 +304,6 @@ export default {
                 'Content-Type': 'application/json'
               }
             }).then(function (res) {
-              console.log(res)
               MessageBox('提示', '支付成功')
               setTimeout(function () {
                 that.$router.push({

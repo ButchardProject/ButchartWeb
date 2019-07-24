@@ -112,10 +112,10 @@ export default {
       var nowYear = date.getFullYear()
       var nowMonth = date.getMonth() + 1 // 注意getMonth从0开始，getDay()也是(此时0代表星期日)
       var nowDay = date.getDate()
-      if(nowMonth >= 1 && nowMonth <= 9) {
+      if (nowMonth >= 1 && nowMonth <= 9) {
         nowMonth = '0' + nowMonth
       }
-      if(nowDay >= 0 && nowDay <= 9) {
+      if (nowDay >= 0 && nowDay <= 9) {
         nowDay = '0' + nowDay
       }
       var str = nowYear + '年' + nowMonth + '月' + nowDay + '日'
