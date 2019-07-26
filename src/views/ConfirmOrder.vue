@@ -272,7 +272,7 @@ export default {
               'floristId': this.currentFloristId, // 花艺师id
               'logistics': {
                 'deliveryMethod': '快递',
-                'freight': 0
+                'freight': this.freight
               },
               'expectedDeliverDate': JSON.parse(sessionStorage.getItem('expressDate')),
               'comment': this.comment
@@ -285,7 +285,7 @@ export default {
               'totalPrice': this.totalPrice, //  价格
               'logistics': {
                 'deliveryMethod': '快递',
-                'freight': 0
+                'freight': this.freight
               },
               'expectedDeliverDate': JSON.parse(sessionStorage.getItem('expressDate')),
               'comment': this.comment
