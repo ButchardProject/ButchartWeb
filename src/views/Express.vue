@@ -120,7 +120,7 @@ export default {
       }
       var str = nowYear + '年' + nowMonth + '月' + nowDay + '日'
       var expressDate = nowYear + '-' + nowMonth + '-' + nowDay
-      sessionStorage.setItem('expressMainDate', JSON.stringify(expressDate))
+      sessionStorage.setItem('expressDate', JSON.stringify(expressDate))
       return str
     },
     // 处理当前地址
@@ -160,11 +160,10 @@ export default {
       }
       if (!(this.date)) {
         // 对当前自取时间进行判断
-        MessageBox('提示', '您还未选择配送时间')
+        MessageBox('提示', '您还未选择配送日期')
         return
       }
       if (this.address && this.date) {
-        sessionStorage.setItem('expressDate', JSON.stringify(this.date))
         // 清空self数据
         sessionStorage.removeItem('takeDate')
         sessionStorage.removeItem('takeSelect')
