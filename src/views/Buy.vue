@@ -229,6 +229,7 @@ export default {
   line-height: 20px;
   text-align: center;
   box-sizing: border-box;
+  -webkit-appearance: none;
 }
 /* 产品一栏 */
 .product {

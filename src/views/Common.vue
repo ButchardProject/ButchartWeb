@@ -60,12 +60,6 @@ export default {
         'type': (this.type)[index]
       }
       sessionStorage.setItem('currentFlowerInfo', JSON.stringify(flowerInfo))
-      // 把当前花的名称，价格以及描述存到sessionStorage里面
-      // sessionStorage.setItem('flowerName', (this.name)[index])
-      // sessionStorage.setItem('price', (this.price)[index])
-      // sessionStorage.setItem('desc', (this.desc)[index])
-      // sessionStorage.setItem('index', index)
-      // sessionStorage.setItem('productId', (this.productId)[index])
     }
   },
   computed: {
@@ -115,7 +109,7 @@ export default {
   white-space: nowrap;
   text-overflow: ellipsis;
   color: #CFCFCF;
-  font-size: 0.2rem;
+  font-size: 0.5rem;
 }
 .desc-price {
   color: #FFFFFF;

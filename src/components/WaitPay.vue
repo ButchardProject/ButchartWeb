@@ -30,7 +30,7 @@ export default {
   name: 'waitpay',
   props: {
     unPayed: {
-      type: Array,
+      type: Array
     }
   },
   data () {
@@ -55,20 +55,19 @@ export default {
               .then(function (res) {
                 console.log(res)
                 if (res.status === 200) {
-                   for (let index in res.data) {
-                      if (res.data[index].status === 'Unpayed') {
-                        for (let i = 0; i < res.data[index].length; i++) {
-                          that.name.push(res.data[index].productList[i].name)
-                          that.price.push(res.data[index].productList[i].price)
-                          that.quantity.push(res.data[index].productList[i].quantity)
-                        }
+                  for (let index in res.data) {
+                    if (res.data[index].status === 'Unpayed') {
+                      for (let i = 0; i < res.data[index].length; i++) {
+                        that.name.push(res.data[index].productList[i].name)
+                        that.price.push(res.data[index].productList[i].price)
+                        that.quantity.push(res.data[index].productList[i].quantity)
                       }
                     }
+                  }
                 }
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
+              }).catch(function (error) {
+                console.log(error)
+              })
           }
         })
         .catch(function (error) {

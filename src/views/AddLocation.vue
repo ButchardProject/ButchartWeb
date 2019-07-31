@@ -106,7 +106,7 @@ export default {
       this.street = editInfo.street
       this.flag = editInfo.flag
       this.sex = editInfo.sex
-      if (this.sex == '先生') {
+      if (this.sex === '先生') {
         this.items[0].checked = true
         this.items[1].checked = false
       } else {
@@ -166,25 +166,24 @@ export default {
         if (this.$route.query.index) {
           // 转成json
           let addressData = JSON.stringify(
-          {
-            '_id': this.locationId,
-            'name': this.name,
-            'sex': this.sex,
-            'province': this.myAddressProvince,
-            'city': this.myAddressCity,
-            'district': this.district,
-            'tel': this.phone,
-            'street': this.street,
-            'postcode': 'string',
-            'isDefault': true
-          })
+            {
+              '_id': this.locationId,
+              'name': this.name,
+              'sex': this.sex,
+              'province': this.myAddressProvince,
+              'city': this.myAddressCity,
+              'district': this.district,
+              'tel': this.phone,
+              'street': this.street,
+              'postcode': 'string',
+              'isDefault': true
+            })
           // 请求服务器
           axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/modifyAddress?access_token=' + sessionStorage.getItem('token'), addressData, {
             headers: {
               'Content-Type': 'application/json'
             }
           }).then(function (res) {
-            console.log('update:>'+res)
             if (res.status === 200) {
               self.$router.push('location')
             }
@@ -193,17 +192,17 @@ export default {
           })
         } else {
           let addressData = JSON.stringify(
-          {
-            'name': this.name,
-            'sex': this.sex,
-            'province': this.myAddressProvince,
-            'city': this.myAddressCity,
-            'district': this.district,
-            'tel': this.phone,
-            'street': this.street,
-            'postcode': 'string',
-            'isDefault': true
-          })
+            {
+              'name': this.name,
+              'sex': this.sex,
+              'province': this.myAddressProvince,
+              'city': this.myAddressCity,
+              'district': this.district,
+              'tel': this.phone,
+              'street': this.street,
+              'postcode': 'string',
+              'isDefault': true
+            })
           // 添加请求header
           axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/addAddress?access_token=' + sessionStorage.getItem('token'), addressData, {
             headers: {

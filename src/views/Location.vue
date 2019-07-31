@@ -186,7 +186,7 @@ export default {
         {
           name: 'addlocation',
           query: {
-            index: index,
+            index: index
           }
         })
     }
@@ -200,9 +200,9 @@ export default {
   height: 100%;
   background-color: #F0F0F0;
   font-size: 0.6rem;
-  padding-top: 2%;
+  /* padding-top: 3%; */
   overflow: scroll;
-  padding-bottom: 15%;
+  padding-bottom: 60px;
 }
 /* 如何当前addresslist没有元素就显示tip */
 .tip {
@@ -277,6 +277,7 @@ ul{
   display: inline-block;
   width: 50%;
   text-align: right;
+  color: #63B8FF;
 }
 /* 删除 */
 .remove {
@@ -287,13 +288,12 @@ ul{
 }
 /* 底部操作栏 */
 .foot{
-  height: 6%;
   width: 100%;
   background-color: #F8F8FF;
   position: fixed;
   bottom: 0;
   line-height:35px;
-  padding-top: 1%;
+  padding: 1% 0;
 }
 /* 添加地址button */
 .add-address {

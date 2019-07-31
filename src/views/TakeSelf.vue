@@ -4,25 +4,25 @@
       <div class="store-lists">
         <div class="title">门店选择</div>
         <ul>
-            <li v-for="(item,index) in num" v-bind:key="index" @click="select(item,index)" :class="[current === index ? 'active' : '']">
+            <li v-for="(item,index) in num" v-bind:key="index" @click="select(index)" :class="[current === index ? 'active' : '']">
                 > {{storeName[index]}}
             </li>
             <mt-popup v-model="visible" popup-transition="popup-fade" class="popup">
                 <div class="storeInfo">
                     <div>
-                      <span class="title">店铺名称: </span>
+                      <span class="titleInfo">店铺名称: </span>
                       <span class="info">{{storeName[flag]}}</span>
                     </div>
                     <div>
-                      <span class="title">店铺地址: </span>
+                      <span class="titleInfo">店铺地址: </span>
                       <span class="info">{{storeProvince[flag]+storeCity[flag]+storeDistrict[flag]+storeStreet[flag]}}</span>
                     </div>
                     <div>
-                      <span class="title">店铺电话: </span>
+                      <span class="titleInfo">店铺电话: </span>
                       <span class="info">{{storeTel[flag]}}</span>
                     </div>
                     <div>
-                      <span class="title">营业状态: </span>
+                      <span class="titleInfo">营业状态: </span>
                       <span class="info">{{storeStatus[flag]}}</span>
                     </div>
                     <div>
@@ -37,10 +37,10 @@
         <div class="title">时间选择</div>
         <span @click="chooseDate()">日期 {{date}}</span>
         <mt-datetime-picker type="date" ref="datePicker" @confirm="handleDateConfirm"
-            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" :startDate="startDate">
+            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" :startDate="startDate" :endDate="endDate">
             </mt-datetime-picker>
         <span @click="chooseTime()">时间 {{time}}</span>
-        <mt-datetime-picker ref="timePicker" type="time" @confirm="handleTimeConfirm">
+        <mt-datetime-picker ref="timePicker" type="time" @confirm="handleTimeConfirm" :startHour="startHour" :endHour="endHour">
         </mt-datetime-picker>
       </div>
     </div>
@@ -69,7 +69,10 @@ export default {
       visible: false, // popup的显示
       flag: '', // 中转index
       current: '', // 当前选中的门店
-      startDate: new Date() // 当前日期
+      startDate: new Date(), // 当前日期
+      endDate: new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 30), // 一个月后结束日期
+      startHour: 9, // 早9
+      endHour: 18 // 晚6
     }
   },
   methods: {
@@ -109,7 +112,7 @@ export default {
       return str
     },
     // 点击出现popup
-    select (item, index) {
+    select (index) {
       this.visible = true // popup显示
       this.flag = index // 把当前index传递给flag
     },
@@ -213,6 +216,9 @@ li {
 .storeInfo {
     margin: 0% 5%;
 }
+.info {
+  color: #CDC9C9;
+}
 .popup {
     width: 80%;
     font-size: 14px;
@@ -229,14 +235,14 @@ li {
 }
 /* 选中之后添加样式 */
 .active {
-    color: #D1EEEE;
+    color: #63B8FF;
 }
 .div-save {
     height: 6%;
     width: 100%;
     background-color: #F8F8FF;
     position: fixed;
-    bottom: 0;
+    bottom: .2rem;
     line-height:35px;
     text-align: center;
 }

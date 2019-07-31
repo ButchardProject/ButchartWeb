@@ -27,7 +27,7 @@ export default {
   name: 'waitreceive',
   props: {
     send: {
-      type: Array,
+      type: Array
     }
   },
   data () {
@@ -36,7 +36,7 @@ export default {
       totalPrice: [], // 价格
       quantity: [], // 购买的数量
       price: [], // 花的单价
-      transactionsID: [], // 订单ID
+      transactionsID: [] // 订单ID
     }
   },
   watch: {

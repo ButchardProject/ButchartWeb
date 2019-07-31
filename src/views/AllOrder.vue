@@ -64,9 +64,6 @@ export default {
   data () {
     return {
       selected: '1',
-      name: [],
-      price: [],
-      quantity: [],
       id: [], // 订单id
       unPayed: [], // 未付款的订单
       payed: [], // 待发货

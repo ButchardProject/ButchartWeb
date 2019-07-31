@@ -14,7 +14,7 @@
           <!-- code -->
           <div class="div-code">
             <input type="text" v-model="code" class="input-pwd" placeholder="输入验证码" maxlength="6" oninput = "value=value.replace(/[^\d]/g,'')"/>
-          <span class="span-btn" v-on:click="sendCode()" :class="{disabled:!this.canClick}">{{content}}</span>
+            <span class="span-btn" v-on:click="sendCode()" :class="{disabled:!this.canClick}">{{content}}</span>
           </div>
           <!-- loginButton -->
           <div>
@@ -85,7 +85,7 @@ export default {
             if (res.status === 200) {
               let userInfo = {
                 'phone': self.phone,
-                'code': self.code,
+                'code': self.code
               }
               sessionStorage.setItem('userInfo', JSON.stringify(userInfo))
               sessionStorage.setItem('token', res.data.token.id) // 保存当前token到sessionStorage
@@ -117,13 +117,12 @@ export default {
 <style lang="css" scoped>
 html body{
   width: 100%;
-  height: 100%;
 }
 /* logo */
 .logo{
   width: 100%;
   text-align: center;
-  margin-top: 20%;
+  padding-top: 20%;
 }
 /* 表单 */
 .form{
@@ -133,12 +132,13 @@ html body{
 }
 /* 输入文本框 */
 .input-account{
-  width: 100%;
+  width: 98%;
   font-size: 0.6rem;
   border: none;
   border-bottom: 1px solid #D3D3D3;
   outline: none;
   margin-top: 15%;
+	-webkit-appearance: none;
 }
 /* 错误提示 */
 .errorMsg {
@@ -149,26 +149,27 @@ html body{
 .div-code{
   width: 100%;
   font-size: 0;
+  margin-top: 1rem;
 }
 /* 输入code框 */
 .input-pwd{
-  width: 58%;
+  width: 60%;
   font-size: 0.6rem;;
   border: none;
   border-bottom: 1px solid #D3D3D3;
   outline: none;
   vertical-align: bottom;
-  margin-top: 15%;
+	-webkit-appearance: none;
 }
 /* 发送验证码按钮 */
 .span-btn{
-  width: 34%;
+  width: 37%;
   display: inline-block;
   border: 1px solid #87CEEB;
   color: #87CEEB;
   border-radius: 0.25rem;
   font-size: 0.5rem;
-  padding: 3% 3%;
+  line-height: 1.5rem;
   text-align: center;
   vertical-align: bottom;
 }

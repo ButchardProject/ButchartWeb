@@ -45,17 +45,7 @@ const router = new Router({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "common" */ './views/Common.vue'),
-      meta: {
-        requireAuth: true
-      },
-      beforeEnter: (to, from, next) => {
-        if (from.name === 'index') {
-          next()
-        } else {
-          next('/')
-        }
-      }
+      component: () => import(/* webpackChunkName: "common" */ './views/Common.vue')
     },
     {
       path: '/manager',
@@ -79,7 +69,7 @@ const router = new Router({
         requireAuth: true
       },
       beforeEnter: (to, from, next) => {
-        if (from.name === 'express') {
+        if (from.name === 'express' || from.name === 'addlocation') {
           next()
         } else {
           next('/')

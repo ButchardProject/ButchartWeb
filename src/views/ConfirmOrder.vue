@@ -64,6 +64,7 @@ import config from '@/config'
 import axios from 'axios'
 import { MessageBox } from 'mint-ui'
 import { setTimeout } from 'timers'
+import wx from 'jweixin-npm'
 export default {
   name: 'confirmorder',
   data () {
@@ -85,30 +86,9 @@ export default {
       deliveryMethod: [], // 配送方案
       freight: '', // 运费
       type: [], // 当前购物产品的类型
-      favour: '' // 减免
+      favour: '', // 减免
+      payment: ''
     }
-  },
-  // 页面创建前先去获取一把花艺师
-  created () {
-    this.getTotal() // 获取当前购物车的数量和总价
-    // 获取登陆之后是否有默认的花艺师
-    if (sessionStorage.getItem('defaultFlorist')) {
-      this.isFlorist = true
-      this.currentFloristId = sessionStorage.getItem('defaultFlorist')
-    }
-    // 获取花艺师
-    let that = this
-    axios.get(config.url + '/getFlorists?access_token=' + sessionStorage.getItem('token'))
-      .then(function (res) {
-        // console.log(res.data)
-        for (let index in res.data) {
-          that.floristId.push(res.data[index].florist._id) // 先把花艺师的id推进去
-          that.floristName.push(res.data[index].username) // 花艺师的name推进去
-        }
-      })
-      .catch(function (error) {
-        console.log(error)
-      })
   },
   mounted () {
     if (this.totalPrice) {
@@ -229,26 +209,7 @@ export default {
               'Content-Type': 'application/json'
             }
           }).then(function (res) {
-            // 支付订单
-            axios.put(config.url + '/user/' + userId + '/transactionId/' + res.data.createdId + '/payTransaction?access_token=' + sessionStorage.getItem('token'), {
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            }).then(function (res) {
-              MessageBox('提示', '支付成功')
-              setTimeout(function () {
-                that.$router.push({
-                  'name': 'allorder',
-                  query: {
-                    'selected': '3'
-                  }
-                })
-                sessionStorage.removeItem('cart')
-                sessionStorage.removeItem('unread')
-              }, 1000)
-            }).catch(function (error) {
-              console.log(error)
-            })
+            that.getWxConfig(res) // 支付订单
           }).catch(function (error) {
             console.log(error)
           })
@@ -297,27 +258,7 @@ export default {
             }
           }).then(function (res) {
             console.log(res)
-            console.log(res.data.createdId)
-            // 支付订单
-            axios.put(config.url + '/user/' + userId + '/transactionId/' + res.data.createdId + '/payTransaction?access_token=' + sessionStorage.getItem('token'), {
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            }).then(function (res) {
-              MessageBox('提示', '支付成功')
-              setTimeout(function () {
-                that.$router.push({
-                  'name': 'allorder',
-                  query: {
-                    'selected': '3'
-                  }
-                })
-                sessionStorage.removeItem('cart')
-                sessionStorage.removeItem('unread')
-              }, 1000)
-            }).catch(function (error) {
-              console.log(error)
-            })
+            that.getWxConfig(res) // 支付订单
           }).catch(function (error) {
             console.log(error)
           })
@@ -378,7 +319,72 @@ export default {
             }
           })
       }
+    },
+    // 获取微信支付
+    getWxConfig (res) {
+      wx.config({
+        debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: res.data.resp.appid, // 必填，公众号的唯一标识
+        timestamp: parseInt(new Date().getTime()/1000), // 必填，生成签名的时间戳
+        nonceStr: res.data.resp.nonce_str, // 必填，生成签名的随机串
+        signature: res.data.resp.sign,// 必填，签名
+        jsApiList: ['chooseWXPay'] // 必填，需要使用的JS接口列表
+      })
+      wx.chooseWXPay({
+        timeStamp: parseInt(new Date().getTime()/1000), // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+        nonceStr: res.data.resp.nonce_str, // 支付签名随机串，不长于 32 位
+        package: res.data.resp.prepay_id, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=\*\*\*）
+        signType: 'MD5', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+        paySign: res.data.resp.sign, // 支付签名
+        success: function (res) {
+          // 支付成功后的回调函数
+          console.log(res)
+        }
+      })
+            // 支付订单
+            // axios.put(config.url + '/user/' + userId + '/transactionId/' + res.data.createdId + '/payTransaction?access_token=' + sessionStorage.getItem('token'), {
+            //   headers: {
+            //     'Content-Type': 'application/json'
+            //   }
+            // }).then(function (res) {
+            //   MessageBox('提示', '支付成功')
+            //   setTimeout(function () {
+            //     that.$router.push({
+            //       'name': 'allorder',
+            //       query: {
+            //         'selected': '3'
+            //       }
+            //     })
+            //     sessionStorage.removeItem('cart')
+            //     sessionStorage.removeItem('unread')
+            //   }, 1000)
+            // }).catch(function (error) {
+            //   console.log(error)
+            // })
     }
+  },
+  // 页面创建前先去获取一把花艺师
+  created () {
+    // this.getWxConfig () // 初始化微信支付
+    this.getTotal() // 获取当前购物车的数量和总价
+    // 获取登陆之后是否有默认的花艺师
+    if (sessionStorage.getItem('defaultFlorist')) {
+      this.isFlorist = true
+      this.currentFloristId = sessionStorage.getItem('defaultFlorist')
+    }
+    // 获取花艺师
+    let that = this
+    axios.get(config.url + '/getFlorists?access_token=' + sessionStorage.getItem('token'))
+      .then(function (res) {
+        // console.log(res.data)
+        for (let index in res.data) {
+          that.floristId.push(res.data[index].florist._id) // 先把花艺师的id推进去
+          that.floristName.push(res.data[index].username) // 花艺师的name推进去
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
   },
   watch: {
     //  判断是否需要错误提示
@@ -463,7 +469,7 @@ export default {
     background-color: #F0F0F0;
     color: #C9C9C9;
     line-height: 30px;
-    font-size: 0.3rem;
+    font-size: 0.5rem;
 }
 .tip > span {
     margin-left: 5%;
@@ -568,6 +574,7 @@ textarea {
   bottom: 0;
   line-height:1.5rem;
   text-align: center;
+  letter-spacing: .2rem;
 }
 /* 确认支付button */
 .confirm-button {

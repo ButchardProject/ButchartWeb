@@ -43,7 +43,7 @@ export default {
   methods: {
     // 追加评论
     addComment (index) {
-      sessionStorage.setItem('comment', JSON.stringify(transactionsID[index])) // 先把当前购买的评价事务ID存下来
+      sessionStorage.setItem('comment', JSON.stringify(this.transactionsID[index])) // 先把当前购买的评价事务ID存下来
       this.$router.push('/comment')
     }
   },

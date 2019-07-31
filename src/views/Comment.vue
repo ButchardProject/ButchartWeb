@@ -74,14 +74,14 @@ export default {
       this.files = this.$refs.inputer.files; // 通过refs获取DOM文件数据,是个数组的形式
       let len = this.files.length + this.imgLen; // 拿到当前图片数量长度
       if (len > 3) {
-        alert('最多可上传3张，您还可以上传' + (3 - this.imgLen) + '张');
+        alert('最多可上传3张，您还可以上传' + (3 - this.imgLen) + '张')
         return false;
       }
       // 判断是否超过5M
       for (let i = 0; i < this.files.length; i++) {
-        let size = Math.floor(this.files[i].size / 1024);
+        let size = Math.floor(this.files[i].size / 1024)
         if (size > 5 * 1024 * 1024) {
-          alert('请选择5M以内的图片！');
+          alert('请选择5M以内的图片！')
           return false
         }
         this.imgLen++; // 当前数量增加
@@ -131,10 +131,10 @@ export default {
         }
         if (this.active === '2') {
           if (!this.desc) {
-            MessageBox('提示', '麻烦写下您的意见或者建议哦');
+            MessageBox('提示', '麻烦写下您的意见或者建议哦')
           }
           if (!this.imgcode.length) {
-            MessageBox('提示', '需要上传您有问题的花束图片');
+            MessageBox('提示', '需要上传您有问题的花束图片')
           }
           if (this.desc && this.imgcode) {
             let info = JSON.stringify({
@@ -163,10 +163,10 @@ export default {
         }
         if (this.active === '3') {
           if (!this.desc) {
-            MessageBox('提示', '麻烦写下您的意见或者建议哦');
+            MessageBox('提示', '麻烦写下您的意见或者建议哦')
           }
           if (!this.imgcode.length) {
-            MessageBox('提示', '需要上传您有问题的花束图片');
+            MessageBox('提示', '需要上传您有问题的花束图片')
           }
           if (this.desc && this.imgcode) {
             let info = JSON.stringify({

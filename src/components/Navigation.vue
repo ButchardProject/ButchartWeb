@@ -111,7 +111,7 @@ export default {
     background: #F5F5F5;
     position: fixed;
     top: 0;
-    height: 1.8rem;
+    height: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -121,7 +121,7 @@ export default {
     display: inline-block;
     text-align: left;
     width: 45%;
-    padding-left: 0.5rem;
+    padding-left: 0.3rem;
   }
   /* 中间小logo */
   #smallLogo {
@@ -143,7 +143,7 @@ export default {
     display: inline-block;
     width: 45%;
     text-align: right;
-    padding:0 0.8rem;
+    padding-right:0.3rem;;
   }
   /* 与svg大小保持一致 */
   .info > img {
@@ -159,10 +159,11 @@ export default {
     display: inline-block;
     width: 0.7rem;
     color: #FFFFFF;
-    font-size: 0.3rem;
+    font-size: 0.5rem;
     text-align: center;
     position: absolute;
-    right: 0.6rem;
+    right: 0.1rem;
+    top: .4rem
   }
   /* 活跃的 */
   .active {

@@ -169,7 +169,7 @@ export default {
         for (let i = 0; i < this.checkList.length; i++) {
           // 筛选未被选中的，不跟选中后的那个元素与父元素比较，会导致重复比并添加到信息
           for (let j = i + 1; j < this.productId.length; j++) {
-            if (this.productId[j] != this.productId[this.checkList[i]]) {
+            if (this.productId[j] !== this.productId[this.checkList[i]]) {
               uncart.push({
                 'productId': this.productId[j],
                 'flowerName': this.name[j],

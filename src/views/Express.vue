@@ -10,7 +10,7 @@
         <div class="express-title">
             <div class="title">配送选择</div>
             <ul>
-                <li> > 顺丰</li>
+                <li v-for="(method,index) in deliveryMethod" :key="index" @click="select(index)" :class="[current === index ? 'active' : '']"> > {{method}}</li>
             </ul>
         </div>
         <hr style="height:1px;border: none;border-top:1px solid #ddd;margin:15px 0;"/>
@@ -24,7 +24,7 @@
         <div class="title">送达日期</div>
         <span @click="chooseDate()">日期 {{date}}</span>
         <mt-datetime-picker type="date" ref="datePicker" @confirm="handleDateConfirm"
-            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" :startDate="startDate">
+            year-format="{value} 年" month-format="{value} 月" date-format="{value} 日" :startDate="startDate" :endDate="endDate">
         </mt-datetime-picker>
       </div>
     </div>
@@ -52,7 +52,11 @@ export default {
       discountNormal: '', // 花束价格
       discountOther: '', // 伴手礼价格
       isNormal: true, // 花束是正常，伴手礼是不正常的
-      startDate: new Date() // 当前日期
+      startDate: new Date(), // 当前日期
+      endDate: new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 30), // 一个月后结束日期
+      deliveryMethod: [], // 配送方式
+      perArea: ['上城区', '下城区', '江干区', '拱墅区', '西湖区', '滨江区'], // 专人配送区域
+      current: '' // 当前配送
     }
   },
   created () {
@@ -65,19 +69,22 @@ export default {
       }
     }).then(function (res) {
       console.log(res.data)
-      if (res.status === 200) {
-        for (let index in res.data) {
-          if (res.data[index].deliveryMethod === '顺丰') {
-            that.other = res.data[index].freight.其他 // 获取其他省份的运费
-            that.normal = res.data[index].freight.浙江省
-            that.discountNormal = res.data[index].config.discount.花束
-            that.discountOther = res.data[index].config.discount.伴手礼
-            let discount = JSON.stringify({
-              'discountNormal': that.discountNormal,
-              'discountOther': that.discountOther
-            })
-            sessionStorage.setItem('discount', discount)
-          }
+      for (let index in res.data) {
+        // 将当前除自提以外的配送方式加入
+        if (res.data[index].deliveryMethod !== '自提') {
+          that.deliveryMethod.push(res.data[index].deliveryMethod)
+        }
+        // 顺丰栏
+        if (res.data[index].deliveryMethod === '顺丰') {
+          that.other = res.data[index].freight.其他 // 获取其他省份的运费
+          that.normal = res.data[index].freight.浙江省
+          that.discountNormal = res.data[index].config.discount.花束
+          that.discountOther = res.data[index].config.discount.伴手礼
+          let discount = JSON.stringify({
+            'discountNormal': that.discountNormal,
+            'discountOther': that.discountOther
+          })
+          sessionStorage.setItem('discount', discount)
         }
       }
     }).catch(function (error) {
@@ -88,6 +95,29 @@ export default {
     this.handleMoney() // 处理当前费用
   },
   methods: {
+    // 选择配送方式
+    select (index) {
+      if (index === 1) { // 如果是专人配送
+        if (this.address) { // 当前地址不为空的话
+          if (this.address.indexOf('杭州市') !== -1) { // 检索地址是否是杭州市
+            for (let i = 0; i < this.perArea.length; i++) { // 检索杭州市内的城市区域
+              if (this.address.indexOf(this.perArea[i]) !== -1) { // 没有超过区域
+                this.normal = 20
+                this.current = index
+                break // 找到了就直接跳出循环，不在执行下面
+              } else { // 超出区域
+                MessageBox('提示', '专人配送超过区域，请选择其它配送方式')
+                continue  // 没找到就继续
+              }
+            }
+          } else { // 不是，直接提示
+            MessageBox('提示', '专人配送超过区域，请选择其它配送方式')
+          }
+        }
+      } else { // 如果是顺丰的话直接显示
+        this.current = index
+      }
+    },
     // 前往location选择地址
     selectAddress () {
       this.$router.push('location')
@@ -158,12 +188,11 @@ export default {
         MessageBox('提示', '您还未选择收货地址')
         return
       }
-      if (!(this.date)) {
-        // 对当前自取时间进行判断
-        MessageBox('提示', '您还未选择配送日期')
+      if (this.current === '') {
+        MessageBox('提示', '您还未选择配送方式')
         return
       }
-      if (this.address && this.date) {
+      if (this.address && this.current !== '') {
         // 清空self数据
         sessionStorage.removeItem('takeDate')
         sessionStorage.removeItem('takeSelect')
@@ -235,6 +264,10 @@ li {
 .storeInfo {
     margin: 0% 5%;
 }
+/* 选中之后添加样式 */
+.active {
+    color: #63B8FF;
+}
 .popup {
     width: 80%;
     font-size: 14px;
@@ -245,7 +278,7 @@ li {
     width: 100%;
     background-color: #F8F8FF;
     position: fixed;
-    bottom: 0;
+    bottom: .2rem;
     line-height:35px;
     text-align: center;
 }
