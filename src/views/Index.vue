@@ -25,7 +25,20 @@ export default {
   },
   data () {
     return {
-      imgList: config.imgList // banner图片
+      imgList: config.imgList, // banner图片
+      code: '' // 验证之后code
+    }
+  },
+  methods: {
+    getCode (name) {
+      return decodeURIComponent(
+        (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ''])[1].replace(/\+/g, '%20')) || null
+    }
+  },
+  created () {
+    if (JSON.parse(sessionStorage.getItem('userInfo'))) {
+      this.code = this.getCode('code')
+      sessionStorage.setItem('code', this.code)
     }
   }
 }

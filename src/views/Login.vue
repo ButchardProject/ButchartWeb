@@ -78,25 +78,25 @@ export default {
         this.errorMsg = '请填写正确的手机号与验证码'
       } else {
         let self = this // then方法内部不能使用Vue的实例化this，在内部this没有被绑定
+        let w = window
         // 验证登陆
         axios.post(config.url + '/login?tel=' + this.phone + '&code=' + this.code)
           .then(function (res) {
             console.log(res)
-            if (res.status === 200) {
-              let userInfo = {
-                'phone': self.phone,
-                'code': self.code
-              }
-              sessionStorage.setItem('userInfo', JSON.stringify(userInfo))
-              sessionStorage.setItem('token', res.data.token.id) // 保存当前token到sessionStorage
-              if (res.data.userProfile.defaultFlorist) { // 判断服务器会不会给我默认的，有了在存
-                sessionStorage.setItem('defaultFlorist', res.data.userProfile.defaultFlorist)
-              }
-              self.$store.dispatch('getAddUnread', res.data.shoppingCart.length) // 更新购物车未读数
-              self.$store.dispatch('setUser', self.phone)
-              self.$store.dispatch('saveToken', res.data.token.id) // 保存当前token到store
-              self.$router.push('/')
+            let userInfo = {
+              'phone': self.phone,
+              'code': self.code
             }
+            sessionStorage.setItem('userInfo', JSON.stringify(userInfo))
+            sessionStorage.setItem('token', res.data.token.id) // 保存当前token到sessionStorage
+            if (res.data.userProfile.defaultFlorist) { // 判断服务器会不会给我默认的，有了在存
+              sessionStorage.setItem('defaultFlorist', res.data.userProfile.defaultFlorist)
+            }
+            self.$store.dispatch('getAddUnread', res.data.shoppingCart.length) // 更新购物车未读数
+            self.$store.dispatch('setUser', self.phone)
+            self.$store.dispatch('saveToken', res.data.token.id) // 保存当前token到store
+            w.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx66142d5363835ef3&redirect_uri=https://www.thebutchart.cn/&response_type=code&scope=snsapi_base&state=123#wechat_redirect'
+          // self.$router.push('/')
           }).catch(function (error) {
             console.log(error)
             MessageBox('登陆失败', '请检查手机号与验证码是否正确')
@@ -138,7 +138,7 @@ html body{
   border-bottom: 1px solid #D3D3D3;
   outline: none;
   margin-top: 15%;
-	-webkit-appearance: none;
+  -webkit-appearance: none;
 }
 /* 错误提示 */
 .errorMsg {
@@ -159,11 +159,11 @@ html body{
   border-bottom: 1px solid #D3D3D3;
   outline: none;
   vertical-align: bottom;
-	-webkit-appearance: none;
+  -webkit-appearance: none;
 }
 /* 发送验证码按钮 */
 .span-btn{
-  width: 37%;
+  width: 35%;
   display: inline-block;
   border: 1px solid #87CEEB;
   color: #87CEEB;

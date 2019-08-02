@@ -119,8 +119,8 @@ export default {
 /* 头像  */
 .t-icon{
   display: inline-block;
-  width: 4rem;
-  height: 4rem;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius:50%;
   position: absolute;
   left: 1.5rem;
@@ -135,7 +135,7 @@ export default {
   overflow: hidden;
   position: absolute;
   right: 5rem;
-  top: 3.8rem;
+  top: 3.4rem;
 }
 /* 编辑图标 */
 .e-icon {
@@ -143,8 +143,8 @@ export default {
   width: 1.2rem;
   height: 1.2rem;
   position: absolute;
-  right: 4.2rem;
-  top: 3.4rem;
+  right: 4.5rem;
+  top: 3rem;
 }
 /* 整个订单信息 */
 .order-info{

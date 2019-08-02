@@ -188,7 +188,8 @@ export default {
                 'freight': 0
               },
               'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + ' ' + JSON.parse(sessionStorage.getItem('takeTime')),
-              'comment': this.comment
+              'comment': this.comment,
+              'code': sessionStorage.getItem('code')
             })
           } else {
             orderParams = JSON.stringify({
@@ -201,7 +202,8 @@ export default {
                 'freight': 0
               },
               'expectedDeliverDate': JSON.parse(sessionStorage.getItem('takeMainDate')) + ' ' + JSON.parse(sessionStorage.getItem('takeTime')),
-              'comment': this.comment
+              'comment': this.comment,
+              'code': sessionStorage.getItem('code')
             })
           }
           axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {
@@ -236,7 +238,8 @@ export default {
                 'freight': this.freight
               },
               'expectedDeliverDate': JSON.parse(sessionStorage.getItem('expressDate')),
-              'comment': this.comment
+              'comment': this.comment,
+              'code': sessionStorage.getItem('code')
             })
           } else {
             orderParams = JSON.stringify({
@@ -249,7 +252,8 @@ export default {
                 'freight': this.freight
               },
               'expectedDeliverDate': JSON.parse(sessionStorage.getItem('expressDate')),
-              'comment': this.comment
+              'comment': this.comment,
+              'code': sessionStorage.getItem('code')
             })
           }
           axios.post(config.url + '/user/' + this.phone + '/createTransaction?access_token=' + sessionStorage.getItem('token'), orderParams, {

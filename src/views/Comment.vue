@@ -42,7 +42,7 @@
   </div>
 </template>
 <script>
-import { TabContainer, TabContainerItem, MessageBox } from 'mint-ui'
+import { MessageBox } from 'mint-ui'
 import config from '@/config'
 import axios from 'axios'
 export default {
@@ -51,11 +51,11 @@ export default {
     return {
       addImage: config.add,
       comment: ['好评', '中评', '差评'],
-      active: "1", // 当前活跃的
+      active: '1', // 当前活跃的
       placeholder: '您对收到的鲜花还满意吗？您有任何意见都可以填写在这里，小布下次会做得更好。若您收到的鲜花有问题，还请上传图片作为凭证',
       remnant: 100, // 剩余字数
       desc: '', // textarea描述
-      formData:new FormData(),
+      formData: new FormData(),
       imgLen: 0, // 图片的数量
       imgcode: [] // 图片的base64
     }
@@ -71,11 +71,11 @@ export default {
     },
     // 添加图片
     addImg () {
-      this.files = this.$refs.inputer.files; // 通过refs获取DOM文件数据,是个数组的形式
-      let len = this.files.length + this.imgLen; // 拿到当前图片数量长度
+      this.files = this.$refs.inputer.files // 通过refs获取DOM文件数据,是个数组的形式
+      let len = this.files.length + this.imgLen // 拿到当前图片数量长度
       if (len > 3) {
         alert('最多可上传3张，您还可以上传' + (3 - this.imgLen) + '张')
-        return false;
+        return false
       }
       // 判断是否超过5M
       for (let i = 0; i < this.files.length; i++) {
@@ -84,7 +84,7 @@ export default {
           alert('请选择5M以内的图片！')
           return false
         }
-        this.imgLen++; // 当前数量增加
+        this.imgLen++ // 当前数量增加
         // 创建一个reader
         let self = this
         let reader = new FileReader()
@@ -112,22 +112,22 @@ export default {
             'appraisal': this.comment[0]
           })
           axios.put(config.url + '/customer/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/transactionId/' + JSON.parse(sessionStorage.getItem('comment')) + '/afterSales?access_token=' + sessionStorage.getItem('token'), info)
-          .then(function (res) {
-            console.log(res)
-            if (res.status === 200) {
-              MessageBox.alert('操作成功').then(action => {
-                that.$router.push({
-                  'name': 'allorder',
-                  query: {
-                    'selected': '5'
-                  }
+            .then(function (res) {
+              console.log(res)
+              if (res.status === 200) {
+                MessageBox.alert('操作成功').then(action => {
+                  that.$router.push({
+                    'name': 'allorder',
+                    query: {
+                      'selected': '5'
+                    }
+                  })
                 })
-              })
-            }
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
+              }
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
         }
         if (this.active === '2') {
           if (!this.desc) {
@@ -155,7 +155,7 @@ export default {
                     })
                   })
                 }
-               })
+              })
               .catch(function (error) {
                 console.log(error)
               })
@@ -187,7 +187,7 @@ export default {
                     })
                   })
                 }
-               })
+              })
               .catch(function (error) {
                 console.log(error)
               })
@@ -286,7 +286,7 @@ li {
   vertical-align: middle;
   margin-left: 5%;
 }
-/* 挡在上面这一层 */
+/* 挡在上面 */
 .add {
   line-height: 40px;
 }

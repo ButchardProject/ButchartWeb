@@ -149,7 +149,6 @@ export default new Vuex.Store({
     getProducts (context) {
       axios.get(config.url + '/getProductSeries')
         .then((res) => {
-          console.log(res)
           for (let data in res.data) {
             context.commit('increment', res.data[data])
           }
@@ -162,6 +161,7 @@ export default new Vuex.Store({
         var sidArray = sessionStorage.getItem('seriesId')
         axios.get(config.url + '/seriesId/' + sidArray + '/getProductsBySeries')
           .then((res) => {
+            console.log(res)
             context.commit('addSeriesNum', res.data.length)
             for (let data in res.data) {
               context.commit('addProduct', res.data[data])
@@ -172,6 +172,7 @@ export default new Vuex.Store({
         sessionStorage.setItem('seriesId', (context.state.seriesId)[index])
         axios.get(config.url + '/seriesId/' + (context.state.seriesId)[index] + '/getProductsBySeries')
           .then((res) => {
+            console.log(res)
             context.commit('addSeriesNum', res.data.length)
             for (let data in res.data) {
               context.commit('addProduct', res.data[data])
@@ -183,7 +184,6 @@ export default new Vuex.Store({
     getStoreLists (context) {
       axios.get(config.url + '/getStoreList?access_token=' + sessionStorage.getItem('token'))
         .then((res) => {
-          console.log(res)
           context.commit('addStoreListsNum', res.data.length)
           for (let data in res.data) {
             context.commit('addStoreLists', res.data[data])

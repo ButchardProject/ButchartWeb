@@ -97,25 +97,27 @@ export default {
   methods: {
     // 选择配送方式
     select (index) {
-      if (index === 1) { // 如果是专人配送
-        if (this.address) { // 当前地址不为空的话
-          if (this.address.indexOf('杭州市') !== -1) { // 检索地址是否是杭州市
-            for (let i = 0; i < this.perArea.length; i++) { // 检索杭州市内的城市区域
-              if (this.address.indexOf(this.perArea[i]) !== -1) { // 没有超过区域
-                this.normal = 20
-                this.current = index
-                break // 找到了就直接跳出循环，不在执行下面
-              } else { // 超出区域
-                MessageBox('提示', '专人配送超过区域，请选择其它配送方式')
-                continue  // 没找到就继续
+      if (this.address) { // 有了地址才给选
+        if (index === 1) { // 如果是专人配送
+          if (this.address) { // 当前地址不为空的话
+            if (this.address.indexOf('杭州市') !== -1) { // 检索地址是否是杭州市
+              for (let i = 0; i < this.perArea.length; i++) { // 检索杭州市内的城市区域
+                if (this.address.indexOf(this.perArea[i]) !== -1) { // 没有超过区域
+                  this.normal = 20
+                  this.current = index
+                  break // 找到了就直接跳出循环，不在执行下面
+                } else { // 超出区域
+                  MessageBox('提示', '专人配送超过区域，请选择其它配送方式')
+                  continue // 没找到就继续
+                }
               }
+            } else { // 不是，直接提示
+              MessageBox('提示', '专人配送超过区域，请选择其它配送方式')
             }
-          } else { // 不是，直接提示
-            MessageBox('提示', '专人配送超过区域，请选择其它配送方式')
           }
+        } else { // 如果是顺丰的话直接显示
+          this.current = index
         }
-      } else { // 如果是顺丰的话直接显示
-        this.current = index
       }
     },
     // 前往location选择地址
@@ -218,7 +220,7 @@ export default {
 }
 .express-content {
     width: 100%;
-    height: 50%;
+    height: 60%;
     background-color: #FFFFFF;
     position: relative;
     top: 5%;

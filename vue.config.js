@@ -8,11 +8,21 @@ module.exports = {
   assetsDir: 'static',
   // 指定生成index.html的路径，相对于（outputDir)。也可以是一个绝对路径
   indexPath: 'index.html',
-  // devServer: {
-  //   // port: 8080, // 端口号
-  //   // host: 'localhost',
-  //   open: true // 配置自动启动浏览器
-  // },
+  devServer: {
+    port: 8080, // 端口号
+    // host: 'www.thebutchart.cn',
+    open: true, // 配置自动启动浏览器
+    proxy: {
+      '/api': { // 碰到/的就当作暗号接头
+        target: 'https://www.thebutchart.cn', // 真实地址
+        secure: false, // 如果是https接口，需设置secure为false
+        changeOrigin: true, // 是否跨域
+        pathRewrite: {
+          '^/api': '/'
+        }
+      }
+    }
+  },
   // 生产环境是否生成 sourceMap 文件，一般情况不建议打开
   productionSourceMap: true
 }
