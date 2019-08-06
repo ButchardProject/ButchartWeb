@@ -30,7 +30,6 @@
 
 <script>
 import config from '@/config'
-
 export default {
   name: 'navigation',
   data () {
@@ -38,7 +37,7 @@ export default {
       logo: config.smallLoginLogo, // 小logo
       myself: config.myself, // 个人中心
       car: config.car, // 购物车
-      content: this.$store.state.seriesName, // 系列内容
+      content: this.$store.state.series.seriesName, // 系列内容
       isActive: false, // 是否需要渲染flag
       current: '', // 当前选中的li元素
       title: '', // 当前title显示信息
@@ -52,7 +51,7 @@ export default {
   methods: {
     getSeries () {
       // 判断下当前state是否是空的，减少网络请求
-      if (this.content.length === 0) {
+      if (this.content.length < 1) {
         this.$store.dispatch('getProducts')
       }
     },

@@ -365,7 +365,7 @@ export default {
             // }).catch(function (error) {
             //   console.log(error)
             // })
-    }
+    },
   },
   // 页面创建前先去获取一把花艺师
   created () {

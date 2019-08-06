@@ -30,6 +30,7 @@ export default {
     }
   },
   methods: {
+    // 获取微信支付code
     getCode (name) {
       return decodeURIComponent(
         (new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ''])[1].replace(/\+/g, '%20')) || null

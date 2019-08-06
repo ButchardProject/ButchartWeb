@@ -16,16 +16,9 @@ export default new Vuex.Store({
       phone: '' // 用户手机号
       // code: '' // 用户验证码
     },
-    seriesId: [], // 鲜花系列的id
-    seriesName: [], // 鲜花系列的主题内容
-    // 系列产品信息
-    product: {
-      productId: [], // 系列产品的id
-      productName: [], // 系列产品的名称
-      productPrice: [], // 系列产品的价格
-      productDesc: [], // 系列产品的描述
-      productNum: '', // 系列产品的数量
-      productType: [] // 系列产品的类型
+    series: {
+      seriesId: [], // 鲜花系列的id
+      seriesName: [] // 鲜花系列的主题内容
     },
     opened: false, // nav默认关闭
     // 店铺
@@ -58,11 +51,6 @@ export default new Vuex.Store({
       price: []
     }
   },
-  getters: {
-    getSeriesId: state => {
-      return state.seriesId
-    }
-  },
   mutations: {
     // nav是否开启关闭
     toggleSideabar (state, data) {
@@ -71,18 +59,14 @@ export default new Vuex.Store({
     // 存储用户的手机
     setUser (state, phone) {
       state.user.phone = phone
-      console.log(phone)
-      console.log(state.user.phone)
     },
     saveToken (state, token) {
       state.token = token
-      // console.log(token)
     },
     // 添加鲜花系列
     increment (state, data) {
-      // console.log(data._id)
-      state.seriesId.push(data._id)
-      state.seriesName.push(data.name)
+      state.series.seriesId.push(data._id)
+      state.series.seriesName.push(data.name)
     },
     // 添加系列产品的各项信息
     addProduct (state, data) {
@@ -92,9 +76,13 @@ export default new Vuex.Store({
       state.product.productPrice.push(data.price)
       state.product.productType.push(data.type)
     },
-    // 获取系列产品的数量
-    addSeriesNum (state, num) {
-      state.product.productNum = num
+    // 添加听花系列产品的各项信息
+    addTHProduct (state, data) {
+      state.productTH.productId.push(data._id)
+      state.productTH.productName.push(data.name)
+      state.productTH.productDesc.push(data.description)
+      state.productTH.productPrice.push(data.price)
+      state.productTH.productType.push(data.type)
     },
     // 获取店铺列表
     addStoreLists (state, data) {
@@ -147,38 +135,15 @@ export default new Vuex.Store({
     },
     // 异步请求花的信息
     getProducts (context) {
+      let seriesId = [] // 为了存到本地
       axios.get(config.url + '/getProductSeries')
         .then((res) => {
           for (let data in res.data) {
+            seriesId.push(res.data[data]._id) // 存到本地
             context.commit('increment', res.data[data])
           }
+          sessionStorage.setItem('seriesId', JSON.stringify(seriesId))
         })
-    },
-    // 通过id获取该系列产品的list
-    getProductBySeries (context, index) {
-      // 先判断当前是否有id，如果没有id，则从sessionStorage去获取
-      if (context.state.seriesId.length < 1) {
-        var sidArray = sessionStorage.getItem('seriesId')
-        axios.get(config.url + '/seriesId/' + sidArray + '/getProductsBySeries')
-          .then((res) => {
-            console.log(res)
-            context.commit('addSeriesNum', res.data.length)
-            for (let data in res.data) {
-              context.commit('addProduct', res.data[data])
-            }
-          })
-      } else {
-        // 有当前的seriesId，直接去服务器请求
-        sessionStorage.setItem('seriesId', (context.state.seriesId)[index])
-        axios.get(config.url + '/seriesId/' + (context.state.seriesId)[index] + '/getProductsBySeries')
-          .then((res) => {
-            console.log(res)
-            context.commit('addSeriesNum', res.data.length)
-            for (let data in res.data) {
-              context.commit('addProduct', res.data[data])
-            }
-          })
-      }
     },
     // 通过userid获取店铺地址
     getStoreLists (context) {

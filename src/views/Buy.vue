@@ -96,6 +96,12 @@ export default {
     this.detail = flowerInfo.desc
     this.productId = flowerInfo.productId
     this.type = flowerInfo.type
+    let flag = flowerInfo.flag
+    if (flag === 1) {
+      this.day = 1
+    } else {
+      this.day = 3
+    }
   },
   methods: {
     // 添加当前花数量
