@@ -86,20 +86,18 @@ export default {
       axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
         .then(function (res) {
           console.log(res)
-          if (res.status === 200) {
-            for (let index in res.data) {
-              if (res.data[index].status === 'Unpayed') {
-                that.unPayed.push(res.data[index]) // 所有未付款的
-              }
-              if (res.data[index].status === 'Payed') {
-                that.payed.push(res.data[index]) // 待发货的
-              }
-              if (res.data[index].status === 'Send') {
-                that.send.push(res.data[index]) // 待收货
-              }
-              if (res.data[index].status === 'AfterSales') {
-                that.afterSales.push(res.data[index]) // 已完成
-              }
+          for (let index in res.data) {
+            if (res.data[index].status === 'Unpayed') {
+              that.unPayed.push(res.data[index]) // 所有未付款的
+            }
+            if (res.data[index].status === 'Payed') {
+              that.payed.push(res.data[index]) // 待发货的
+            }
+            if (res.data[index].status === 'Send') {
+              that.send.push(res.data[index]) // 待收货
+            }
+            if (res.data[index].status === 'AfterSales') {
+              that.afterSales.push(res.data[index]) // 已完成
             }
           }
         })

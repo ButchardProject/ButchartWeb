@@ -3,8 +3,6 @@
   <div class="content">
     <div class="title">
       <img class="t-icon" :src=" avatar == '' ? defaultIcon : avatar" @click="editIcon()"/>
-      <!-- <mt-actionsheet :actions="data" v-model="sheetVisible"></mt-actionsheet> -->
-      <!-- <input ref="photoref" type="file" accept="image/*" capture="camera" @change="getCamera" style="display: none"/> -->
       <div class="username" @click="editName()">
         <span>{{name}}</span>
         <!-- <img class="e-icon" src="../assets/logo/edit.png"/> -->
@@ -14,18 +12,22 @@
       <div class="myOrder" @click="link('1')">我的订单</div><hr>
       <div class="option">
         <span class="option-span" @click="link('2')">
+          <mt-badge type="primary">{{unPayed.length}}</mt-badge>
           <img class="option-image" src="../assets/logo/pending-payment.png"/>
           <span>待付款</span>
         </span>
         <span class="option-span" @click="link('3')">
+          <mt-badge type="primary">{{payed.length}}</mt-badge>
           <img class="option-image" src="../assets/logo/pending-send.png"/>
           <span>待发货</span>
         </span>
         <span class="option-span" @click="link('4')">
+          <mt-badge type="primary">{{send.length}}</mt-badge>
           <img class="option-image" src="../assets/logo/pending-receive.png"/>
           <span>待收货</span>
         </span>
         <span class="option-span" @click="link('5')">
+          <mt-badge type="primary">{{afterSales.length}}</mt-badge>
           <img class="option-image" src="../assets/logo/finish.png"/>
           <span>已完成</span>
         </span>
@@ -44,9 +46,8 @@
   </div>
 </template>
 <script>
-import { MessageBox } from 'mint-ui'
 import axios from 'axios'
-import config from  '@/config'
+import config from '@/config'
 export default {
   name: 'manager',
   data () {
@@ -54,16 +55,10 @@ export default {
       name: JSON.parse(sessionStorage.getItem('userInfo')).phone, // 用户昵称
       defaultIcon: config.default_icon, // 默认头像
       avatar: '', // 头像
-      // action sheet 选项内容
-//       data: [{
-//         name: '拍照',
-//         method : this.getCamera	// 调用methods中的函数
-//       }, {
-//         name: '从相册中选择', 
-//         method : this.getLibrary	// 调用methods中的函数
-//       }],
-      // action sheet 默认不显示，为false。操作sheetVisible可以控制显示与隐藏
-//       sheetVisible: false
+      unPayed: [], // 未付款的订单
+      payed: [], // 待发货
+      send: [], // 已发货
+      afterSales: [] // 已完成
     }
   },
   methods: {
@@ -97,44 +92,34 @@ export default {
         }
       })
     },
-    // 打开摄像头
-    async getCamera () {
-      // console.log(this.$refs.photoref.files)
-      // // console.log(file)
-      // // 获取图片base64 代码，并存放到 avatar 中
-      // this.avatar = await this.FileReader(this.$refs.photoref.files[0])
-      // let data = {
-      //   'avatar': this.avatar,
-      // }
-      // // 更新用户信息
-      // axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/updateUserInfo?access_token=' + sessionStorage.getItem('token'), data, {
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   }
-      // })
-      //   .then(function (res) {
-      //     console.log(res)
-      //     // 子组件给父组件传递数据
-      //     self.$emit('setUserInfo', data)
-      //   }).catch(function (error) {
-      //     console.log(error)
-      //   })
-    },
-    /**
-     * 返回用户拍照图片的base64
-     */
-    // FileReader (FileInfo) {
-    //   // FileReader 方法参考地址：https://developer.mozilla.org/zh-CN/docs/Web/API/FileReader
-    //   let reader = new FileReader()
-    //   // readAsDataURL 方法参考地址：https://developer.mozilla.org/zh-CN/docs/Web/API/FileReader/readAsDataURL
-    //   reader.readAsDataURL(FileInfo)
-    //   // 监听读取操作结束
-    //   /* eslint-disable */
-    //   return new Promise(resolve => reader.onloadend = () => resolve(reader.result))
-    // },
-    // // 打开相册
-    // getLibray () {
-    // }
+    // 获取用户所有订单
+    getUserOrder () {
+      let that = this
+      axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
+        .then(function (res) {
+          console.log(res)
+          for (let index in res.data) {
+            if (res.data[index].status === 'Unpayed') {
+              that.unPayed.push(res.data[index]) // 所有未付款的
+            }
+            if (res.data[index].status === 'Payed') {
+              that.payed.push(res.data[index]) // 待发货的
+            }
+            if (res.data[index].status === 'Send') {
+              that.send.push(res.data[index]) // 待收货
+            }
+            if (res.data[index].status === 'AfterSales') {
+              that.afterSales.push(res.data[index]) // 已完成
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    }
+  },
+  mounted () {
+    this.getUserOrder()
   }
 }
 </script>
@@ -164,6 +149,19 @@ export default {
   position: absolute;
   left: 1.5rem;
   top: 2rem;
+}
+/* 未读数background */
+.mint-badge.is-primary {
+  position: relative;
+  left: .1rem;
+  /* top: 50%; */
+  width: .8rem;
+  line-height: .5rem;
+
+}
+/* 未读数数字 */
+.mint-badge.is-primary {
+  font-size: 10px;
 }
 /* 文字 */
 .username > span{
