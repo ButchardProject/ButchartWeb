@@ -63,8 +63,6 @@
 import config from '@/config'
 import axios from 'axios'
 import { MessageBox } from 'mint-ui'
-import { setTimeout } from 'timers'
-import wx from 'jweixin-npm'
 export default {
   name: 'confirmorder',
   data () {
@@ -163,7 +161,7 @@ export default {
         let that = this
         let productList = []
         let orderParams
-        let userId = this.phone
+        // let userId = this.phone
         // 自取
         if (this.$route.query.ship === 'takeself') {
           for (let i = 0; i < JSON.parse(sessionStorage.getItem('cart')).length; i++) {
@@ -342,7 +340,7 @@ export default {
         console.log(res.data)
         for (let index in res.data) {
           that.floristUserId.push(res.data[index].florist.userId) // 先把花艺师的id推进去
-          that.floristName.push(res.data[index].username) // 花艺师的name推进去
+          that.floristName.push(res.data[index].fullname) // 花艺师的name推进去
         }
       })
       .catch(function (error) {

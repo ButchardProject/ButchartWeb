@@ -3,11 +3,8 @@
 </div>
 </template>
 <script>
-import wx from 'jweixin-npm'
-import axios from 'axios'
-import config from '@/config'
+// import wx from 'jweixin-npm'
 import { MessageBox } from 'mint-ui'
-import { setTimeout } from 'timers'
 // WeixinJSBridge
 export default {
   name: 'pay',
