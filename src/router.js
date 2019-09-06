@@ -124,6 +124,24 @@ const router = new Router({
       }
     },
     {
+      path: '/pay',
+      name: 'pay',
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import(/* webpackChunkName: "confirmorder" */ './views/Pay.vue'),
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (from.name === 'confirmorder') {
+          next()
+        } else {
+          next('/')
+        }
+      }
+    },
+    {
       path: '/takeself',
       name: 'takeself',
       // route level code-splitting

@@ -132,7 +132,7 @@ html body{
 }
 /* 输入文本框 */
 .input-account{
-  width: 98%;
+  width: 95%;
   font-size: 0.6rem;
   border: none;
   border-bottom: 1px solid #D3D3D3;
@@ -153,7 +153,7 @@ html body{
 }
 /* 输入code框 */
 .input-pwd{
-  width: 60%;
+  width: 56%;
   font-size: 0.6rem;;
   border: none;
   border-bottom: 1px solid #D3D3D3;

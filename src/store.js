@@ -49,6 +49,18 @@ export default new Vuex.Store({
     // 所有订单信息
     carOrder: {
       price: []
+    },
+    // 支付参数
+    payParam: {
+      createdId: '',
+      appId: '',
+      timestamp: '',
+      nonceStr: '',
+      signature: '',
+      timeStamp: '',
+      package: '',
+      signType: '',
+      paySign: ''
     }
   },
   mutations: {
@@ -118,6 +130,18 @@ export default new Vuex.Store({
     addCarOrder (state, data) {
       state.carOrder.price.push(data)
       sessionStorage.setItem('priceArray', state.carOrder.price)
+    },
+    // 设置支付参数
+    setPayParam (state, res) {
+      state.payParam.createdId = res.data.createdId
+      state.payParam.appId = res.data.resp.appId
+      state.payParam.nonceStr = res.data.resp.nonceStr
+      state.payParam.timestamp = res.data.resp.timeStamp
+      state.payParam.signature = res.data.resp.signature
+      state.payParam.timeStamp = res.data.resp.timeStamp
+      state.payParam.package = res.data.resp.package
+      state.payParam.signType = res.data.resp.signType
+      state.payParam.paySign = res.data.resp.paySign
     }
   },
   actions: {
@@ -179,6 +203,10 @@ export default new Vuex.Store({
             }
           }
         })
+    },
+    // 获取支付参数
+    getPayParam (context, res) {
+      context.commit('setPayParam', res)
     }
   }
 })

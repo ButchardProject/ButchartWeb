@@ -5,6 +5,7 @@ let config = {
   smallLoginLogo: require('../assets/logo/logo60.png'),
   // 个人中心logo
   myself: require('../assets/logo/myself.png'),
+  default_icon: require('../assets/logo/default_icon.png'),
   // 购物车logo
   car: require('../assets/logo/car.png'),
   // 上传图片logo

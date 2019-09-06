@@ -49,26 +49,24 @@ export default {
       axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/transactionId/' + this.transactionsID[index] + '/payTransaction?access_token=' + sessionStorage.getItem('token'))
         .then(function (res) {
           console.log(res)
-          if (res.status === 200) {
-            // 如果当前已经付款的话，重新去服务器获取数据
-            axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
-              .then(function (res) {
-                console.log(res)
-                if (res.status === 200) {
-                  for (let index in res.data) {
-                    if (res.data[index].status === 'Unpayed') {
-                      for (let i = 0; i < res.data[index].length; i++) {
-                        that.name.push(res.data[index].productList[i].name)
-                        that.price.push(res.data[index].productList[i].price)
-                        that.quantity.push(res.data[index].productList[i].quantity)
-                      }
+          // 如果当前已经付款的话，重新去服务器获取数据
+          axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
+            .then(function (res) {
+              console.log(res)
+              if (res.status === 200) {
+                for (let index in res.data) {
+                  if (res.data[index].status === 'Unpayed') {
+                    for (let i = 0; i < res.data[index].length; i++) {
+                      that.name.push(res.data[index].productList[i].name)
+                      that.price.push(res.data[index].productList[i].price)
+                      that.quantity.push(res.data[index].productList[i].quantity)
                     }
                   }
                 }
-              }).catch(function (error) {
-                console.log(error)
-              })
-          }
+              }
+            }).catch(function (error) {
+              console.log(error)
+            })
         })
         .catch(function (error) {
           console.log(error)

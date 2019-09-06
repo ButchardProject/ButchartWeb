@@ -109,7 +109,7 @@ export default {
     },
     // 前往主页
     home () {
-      this.$router.push('/')
+      this.$router.push('/?code=' + sessionStorage.getItem('code'))
     },
     manager () {
       this.$router.push('/manager')

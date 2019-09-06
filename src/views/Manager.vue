@@ -2,11 +2,12 @@
 <template>
   <div class="content">
     <div class="title">
-      <img class="t-icon" src="../assets/logo/default_icon.png" @click="editIcon()"/>
-      <mt-actionsheet :actions="actions" v-model="sheetVisible"></mt-actionsheet>
+      <img class="t-icon" :src=" avatar == '' ? defaultIcon : avatar" @click="editIcon()"/>
+      <!-- <mt-actionsheet :actions="data" v-model="sheetVisible"></mt-actionsheet> -->
+      <!-- <input ref="photoref" type="file" accept="image/*" capture="camera" @change="getCamera" style="display: none"/> -->
       <div class="username" @click="editName()">
         <span>{{name}}</span>
-        <img class="e-icon" src="../assets/logo/edit.png"/>
+        <!-- <img class="e-icon" src="../assets/logo/edit.png"/> -->
       </div>
     </div>
     <div class="order-info">
@@ -44,42 +45,48 @@
 </template>
 <script>
 import { MessageBox } from 'mint-ui'
+import axios from 'axios'
+import config from  '@/config'
 export default {
   name: 'manager',
   data () {
     return {
       name: JSON.parse(sessionStorage.getItem('userInfo')).phone, // 用户昵称
-      actions: [{
-        name: '拍照',
-        method: this.getCamera() // 打开摄像头
-      }, {
-        name: '从相册中选择',
-        method: this.getLibray() // 从相册中获取
-      }],
-      sheetVisible: false // 调起页面
+      defaultIcon: config.default_icon, // 默认头像
+      avatar: '', // 头像
+      // action sheet 选项内容
+//       data: [{
+//         name: '拍照',
+//         method : this.getCamera	// 调用methods中的函数
+//       }, {
+//         name: '从相册中选择', 
+//         method : this.getLibrary	// 调用methods中的函数
+//       }],
+      // action sheet 默认不显示，为false。操作sheetVisible可以控制显示与隐藏
+//       sheetVisible: false
     }
   },
   methods: {
     // 前往主页
     home () {
-      this.$router.push('/')
+      this.$router.push('/?code=' + sessionStorage.getItem('code'))
     },
     /* 修改头像 */
     editIcon () {
-      this.sheetVisible = true
+      // this.sheetVisible = true
     },
     // 个人设置
     editName () {
       //  message,title
-      MessageBox.prompt(' ', '请输入昵称').then(({ value, action }) => {
-        if (value.length > 11) {
-          MessageBox.alert('长度不能超过11个字').then(action => {
-          })
-        } else {
-          this.name = value // 更新到本地，但是没有更新到云端
-          MessageBox.alert('修改成功')
-        }
-      })
+      // MessageBox.prompt(' ', '请输入昵称').then(({ value, action }) => {
+      //   if (value.length > 11) {
+      //     MessageBox.alert('长度不能超过11个字').then(action => {
+      //     })
+      //   } else {
+      //     this.name = value // 更新到本地，但是没有更新到云端
+      //     MessageBox.alert('修改成功')
+      //   }
+      // })
     },
     // 前往订单页
     link (number) {
@@ -91,11 +98,43 @@ export default {
       })
     },
     // 打开摄像头
-    getCamera () {
+    async getCamera () {
+      // console.log(this.$refs.photoref.files)
+      // // console.log(file)
+      // // 获取图片base64 代码，并存放到 avatar 中
+      // this.avatar = await this.FileReader(this.$refs.photoref.files[0])
+      // let data = {
+      //   'avatar': this.avatar,
+      // }
+      // // 更新用户信息
+      // axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/updateUserInfo?access_token=' + sessionStorage.getItem('token'), data, {
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   }
+      // })
+      //   .then(function (res) {
+      //     console.log(res)
+      //     // 子组件给父组件传递数据
+      //     self.$emit('setUserInfo', data)
+      //   }).catch(function (error) {
+      //     console.log(error)
+      //   })
     },
-    // 打开相册
-    getLibray () {
-    }
+    /**
+     * 返回用户拍照图片的base64
+     */
+    // FileReader (FileInfo) {
+    //   // FileReader 方法参考地址：https://developer.mozilla.org/zh-CN/docs/Web/API/FileReader
+    //   let reader = new FileReader()
+    //   // readAsDataURL 方法参考地址：https://developer.mozilla.org/zh-CN/docs/Web/API/FileReader/readAsDataURL
+    //   reader.readAsDataURL(FileInfo)
+    //   // 监听读取操作结束
+    //   /* eslint-disable */
+    //   return new Promise(resolve => reader.onloadend = () => resolve(reader.result))
+    // },
+    // // 打开相册
+    // getLibray () {
+    // }
   }
 }
 </script>
@@ -197,5 +236,16 @@ export default {
   width: 50%;
   display: inline-block;
   text-align: center;
+}
+input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* bottom: 0; */
+  width: 200px;
+  height: 200px;
+  z-index: 9;
+  opacity: 0;
+  /* border: 1px solid red; */
 }
 </style>
