@@ -142,6 +142,18 @@ export default new Vuex.Store({
       state.payParam.package = res.data.resp.package
       state.payParam.signType = res.data.resp.signType
       state.payParam.paySign = res.data.resp.paySign
+    },
+    // repay参数兼容
+    setPay (state, res, id) {
+      state.payParam.createdId = id
+      state.payParam.appId = res.data.resp.appId
+      state.payParam.nonceStr = res.data.resp.nonceStr
+      state.payParam.timestamp = res.data.resp.timeStamp
+      state.payParam.signature = res.data.resp.signature
+      state.payParam.timeStamp = res.data.resp.timeStamp
+      state.payParam.package = res.data.resp.package
+      state.payParam.signType = res.data.resp.signType
+      state.payParam.paySign = res.data.resp.paySign
     }
   },
   actions: {
@@ -205,8 +217,12 @@ export default new Vuex.Store({
         })
     },
     // 获取支付参数
-    getPayParam (context, res) {
-      context.commit('setPayParam', res)
+    getPayParam (context, res, id) {
+      if (id) {
+        context.commit('setPayParam', res)
+      } else {
+        context.commit('setPay', res, id)
+      }
     }
   }
 })

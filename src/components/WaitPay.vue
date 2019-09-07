@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="content" v-for="(item,index) in unPayed" :key="index">
+    <div class="content" v-for="(item,index) in unPayed" :key="index" @click="getDetail(index)">
       <div class="div-text">
         <!-- 选中checkbox -->
         <input class="checkbox" type="checkbox">
@@ -17,24 +17,41 @@
         共计:¥<span>{{price[index] * quantity[index]}}</span>
       </div>
       <div class="confirm">
-        <span class="cancel">取消</span>
+        <span class="cancel" @click="cancel(index)">取消</span>
         <span class="pay" @click="pay(index)">付款</span>
       </div>
+    </div>
+    <div>
+      <ul class="pagination" >
+            <li v-show="current != 1" @click="current-- && goto(current)" ><a href="#">上一页</a></li>
+            <li v-for="index in pages" @click="goto(index)" :class="{'active':current == index}" :key="index">
+              <a href="#" >{{index}}</a>
+            </li>
+            <li v-show="allpage != current && allpage != 0 " @click="current++ && goto(current++)"><a href="#" >下一页</a></li>
+        </ul>
     </div>
   </div>
 </template>
 <script>
 import config from '@/config'
 import axios from 'axios'
+import { MessageBox, Indicator } from 'mint-ui'
 export default {
   name: 'waitpay',
   props: {
     unPayed: {
       type: Array
+    },
+    unPayedSum: {
+      type: Number,
+      default: 0
     }
   },
   data () {
     return {
+      current: 1, // 当前页
+      showItem: 5, // 显示当前几个项目
+      allpage: 0, // 分页总数
       name: [], // 花名
       totalPrice: [], // 价格
       quantity: [], // 购买的数量
@@ -43,34 +60,67 @@ export default {
     }
   },
   methods: {
-    // 付款
-    pay (index) {
-      let that = this
-      axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/transactionId/' + this.transactionsID[index] + '/payTransaction?access_token=' + sessionStorage.getItem('token'))
+    getDetail (index) {
+      console.log(this.transactionsID[index])
+    },
+  // 分页跳转
+  goto (index) {
+    if (index === this.current) return
+      this.current = index
+      // 这里可以发送ajax请求
+      Indicator.open('加载中...')
+      let self = this
+      let info = {
+        'status': 'Unpayed'
+      }
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
           console.log(res)
-          // 如果当前已经付款的话，重新去服务器获取数据
-          axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
-            .then(function (res) {
-              console.log(res)
-              if (res.status === 200) {
-                for (let index in res.data) {
-                  if (res.data[index].status === 'Unpayed') {
-                    for (let i = 0; i < res.data[index].length; i++) {
-                      that.name.push(res.data[index].productList[i].name)
-                      that.price.push(res.data[index].productList[i].price)
-                      that.quantity.push(res.data[index].productList[i].quantity)
-                    }
-                  }
-                }
-              }
-            }).catch(function (error) {
-              console.log(error)
-            })
+          // 如果当前数据是有的就继续操作
+          if (res.data.length > 0) {
+            // 把之前的先清空，保证在查询的时候，不会重复推
+            self.$parent.unPayed = []
+            for (let index in res.data) {
+              self.$parent.unPayed.push(res.data[index]) // 所有未付款的
+            }
+            Indicator.close()
+          } else { // 没有直接把表格数据置位0
+            self.$parent.unPayed = []
+          }
         })
         .catch(function (error) {
           console.log(error)
         })
+    },
+    // 付款
+    pay (index) {
+      let self = this
+      axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone +
+       '/transaction/' + this.transactionsID[index] + '/repayTransaction?&access_token=' + sessionStorage.getItem('token'))
+        .then(function (res) {
+          console.log(res)
+          // 重新去刷新一下
+          self.$store.dispatch('getPayParam', res, this.transactionsID[index]) // 支付订单
+          self.$router.push('pay')
+        }).catch(function (error) {
+          console.log(error)
+        })
+    },
+    // 取消订单
+    cancel (index) {
+      let self = this
+      MessageBox.confirm('是否取消订单?').then(action => {
+        if (action === 'confirm') {
+          axios.put(config.manager + '/transaction/' + this.transactionsID[index] + '/close?&access_token=' + sessionStorage.getItem('token'))
+            .then(function (res) {
+              console.log(res)
+              // 重新去刷新一下
+              self.$parent.$parent.$parent.getUserOrder()
+            }).catch(function (error) {
+              console.log(error)
+            })
+        }
+      })
     }
   },
   watch: {
@@ -85,6 +135,33 @@ export default {
           }
         }
       }
+    },
+    unPayedSum (val, oldVal) {
+      if (val) {
+        this.allpage = val
+      }
+    }
+  },
+  computed: {
+    pages () {
+      var pag = []
+      if (this.current < this.showItem) { // 如果当前的激活的项 小于要显示的条数
+        // 总页数和要显示的条数那个大就显示多少条
+        var i = Math.min(this.showItem, this.allpage)
+        while (i) {
+          pag.unshift(i--)
+        }
+      } else { // 当前页数大于显示页数了
+        var middle = this.current - Math.floor(this.showItem / 2) // 从哪里开始
+        i = this.showItem
+        if (middle > (this.allpage - this.showItem)) {
+          middle = (this.allpage - this.showItem) + 1
+        }
+        while (i--) {
+          pag.push(middle++)
+        }
+      }
+      return pag
     }
   }
 }
@@ -98,6 +175,36 @@ export default {
   margin-top: 5%;
   border-radius: 15px;
   padding: 2% 5%;
+}
+/* 分页相关  */
+li {
+  list-style:none;
+}
+a {
+  text-decoration:none;
+}
+.pagination {
+  position: relative;
+  margin-top: 5%;
+  text-align: right;
+}
+.pagination li{
+  display: inline-block;
+  margin:0 .2rem;
+}
+.pagination li a{
+  padding:.2rem .4rem;
+  display:inline-block;
+  border:1px solid #ddd;
+  background:#fff;
+  color:#0E90D2;
+}
+.pagination li a:hover{
+  background:#eee;
+}
+.pagination li.active a{
+  background:#0E90D2;
+  color:#fff;
 }
 /* 第一行的div*/
 .div-text {

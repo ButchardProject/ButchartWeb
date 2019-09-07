@@ -8,7 +8,7 @@
       <div class="title" v-show="thProductId.length < 1 ? false : true">听花系列</div>
       <div class="product">
         <div class="product-item" v-for="(thItem,thIndex) in thProductName.length" :key="thIndex" @click="thSelect(thIndex)">
-          <img src="../assets/images/list01.png"/>
+          <img :src="thProductImg[thIndex]">
           <div class="desc">
             <div class="desc-name">{{thProductName[thIndex]}}</div>
             <p class="desc-desc">{{thProductDesc[thIndex]}}</p>
@@ -22,7 +22,7 @@
       <!-- 花束 -->
       <div class="product">
         <div class="product-item" v-for="(item,index) in productName.length" :key="index" @click="select(index)">
-          <img src="../assets/images/list01.png"/>
+          <img :src="productImg[index]"/>
           <div class="desc">
             <div class="desc-name">{{productName[index]}}</div>
             <p class="desc-desc">{{productDesc[index]}}</p>
@@ -51,13 +51,16 @@ export default {
       productPrice: [], // 系列产品的价格
       productDesc: [], // 系列产品的描述
       productType: [], // 系列产品的类型
+      productImg: [], // 系列产品的图片
+      img: [], // 花束图片
       // 听花系列产品信息
       thProductId: [], // 系列产品的id
       thProductName: [], // 系列产品的名称
       thProductPrice: [], // 系列产品的价格
       thProductDesc: [], // 系列产品的描述
       thProductType: [], // 系列产品的类型
-      img: [], // 图片logo
+      thProductImg: [], // 系列产品的类型
+      thImg: [], // 听花图片
       id: this.$route.query.id // 当前第几个index
     }
   },
@@ -72,8 +75,8 @@ export default {
       let seriesId = JSON.parse(sessionStorage.getItem('seriesId'))
       axios.get(config.url + '/seriesId/' + seriesId[id] + '/getProductsBySeries')
         .then((res) => {
-          console.log(res)
           for (let i in res.data) {
+            console.log(res.data[i].pics)
             if (res.data[i].type === '听花') {
               // 听花
               self.thProductId.push(res.data[i]._id)
@@ -81,13 +84,17 @@ export default {
               self.thProductPrice.push(res.data[i].price)
               self.thProductDesc.push(res.data[i].description)
               self.thProductType.push(res.data[i].type)
+              self.thProductImg.push(res.data[i].pics[0])
+              self.thImg.push(res.data[i].pics)
             } else {
               // 非听花
+              self.productImg.push(res.data[i].pics[0])
               self.productId.push(res.data[i]._id)
               self.productName.push(res.data[i].name)
               self.productPrice.push(res.data[i].price)
               self.productDesc.push(res.data[i].description)
               self.productType.push(res.data[i].type)
+              self.img.push(res.data[i].pics)
             }
           }
         })
@@ -108,6 +115,7 @@ export default {
         'price': (this.productPrice)[index],
         'desc': (this.productDesc)[index],
         'type': (this.productType)[index],
+        'img': (this.img)[index],
         'flag': 1 // 标志位，用于提示1还是3
       }
       sessionStorage.setItem('currentFlowerInfo', JSON.stringify(flowerInfo))
@@ -128,6 +136,7 @@ export default {
         'price': (this.thProductPrice)[thIndex],
         'desc': (this.thProductDesc)[thIndex],
         'type': (this.thProductType)[thIndex],
+        'img': (this.thImg)[thIndex],
         'flag': 2 // 标志位，用于提示1还是3
       }
       sessionStorage.setItem('currentFlowerInfo', JSON.stringify(flowerInfo))
@@ -163,6 +172,12 @@ export default {
 <style lang="css" scoped>
 .content {
   margin-top: 2.2rem;
+}
+/* 图片 */
+img {
+  display: inline-block;
+  width: 4rem;
+  height: 6rem;
 }
 /* div的宽度 */
 .product {

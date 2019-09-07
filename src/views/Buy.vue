@@ -6,8 +6,8 @@
     <div :class="['div-swiper', opened ? 'div-swiper-open' : 'div-swiper-close']">
         <swiper :options="swiperOption" class="swiper">
         <!-- slides -->
-        <swiper-slide v-for="(item,index) in banner_list" v-bind:key="index">
-          <img v-bind:src="item.img" class="img"/>
+        <swiper-slide v-for="(item,index) in img" v-bind:key="index">
+          <img v-bind:src="item" class="img"/>
         </swiper-slide>
         <!-- Optional controls 原点，左右切换 -->
         <div class="swiper-pagination"  slot="pagination"></div>
@@ -62,6 +62,7 @@ export default {
   },
   data () {
     return {
+      img: [],
       banner_list: config.imgList, // banner的图片集合
       productId: '', // id
       price: '', // 花价
@@ -96,6 +97,7 @@ export default {
     this.detail = flowerInfo.desc
     this.productId = flowerInfo.productId
     this.type = flowerInfo.type
+    this.img = flowerInfo.img
     let flag = flowerInfo.flag
     if (flag === 1) {
       this.day = 1
@@ -190,7 +192,7 @@ export default {
 }
 .img {
   width: 100%;
-  height: 50%;
+  height: 14rem;
 }
 /* 价格一栏 */
 .price{
@@ -253,12 +255,13 @@ export default {
   padding-bottom: 35px;
 }
 /* 产品详细介绍 */
-.detail{
+.detail {
   text-indent: 2em;
   margin-top: 2%;
   font-size: 0.4rem;
   letter-spacing: 2px;
   margin: 0 3%;
+  padding-bottom: 2rem;
 }
 /* 页脚 */
 .foot{

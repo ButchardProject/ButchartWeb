@@ -12,22 +12,22 @@
       <div class="myOrder" @click="link('1')">我的订单</div><hr>
       <div class="option">
         <span class="option-span" @click="link('2')">
-          <mt-badge type="primary">{{unPayed.length}}</mt-badge>
+          <!-- <mt-badge type="primary">{{unPayed.length}}</mt-badge> -->
           <img class="option-image" src="../assets/logo/pending-payment.png"/>
           <span>待付款</span>
         </span>
         <span class="option-span" @click="link('3')">
-          <mt-badge type="primary">{{payed.length}}</mt-badge>
+          <!-- <mt-badge type="primary">{{payed.length}}</mt-badge> -->
           <img class="option-image" src="../assets/logo/pending-send.png"/>
           <span>待发货</span>
         </span>
         <span class="option-span" @click="link('4')">
-          <mt-badge type="primary">{{send.length}}</mt-badge>
+          <!-- <mt-badge type="primary">{{send.length}}</mt-badge> -->
           <img class="option-image" src="../assets/logo/pending-receive.png"/>
           <span>待收货</span>
         </span>
         <span class="option-span" @click="link('5')">
-          <mt-badge type="primary">{{afterSales.length}}</mt-badge>
+          <!-- <mt-badge type="primary">{{afterSales.length}}</mt-badge> -->
           <img class="option-image" src="../assets/logo/finish.png"/>
           <span>已完成</span>
         </span>
@@ -46,7 +46,7 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 import config from '@/config'
 export default {
   name: 'manager',
@@ -54,11 +54,11 @@ export default {
     return {
       name: JSON.parse(sessionStorage.getItem('userInfo')).phone, // 用户昵称
       defaultIcon: config.default_icon, // 默认头像
-      avatar: '', // 头像
-      unPayed: [], // 未付款的订单
-      payed: [], // 待发货
-      send: [], // 已发货
-      afterSales: [] // 已完成
+      avatar: '' // 头像
+      // unPayed: [], // 未付款的订单
+      // payed: [], // 待发货
+      // send: [], // 已发货
+      // afterSales: [] // 已完成
     }
   },
   methods: {
@@ -94,32 +94,32 @@ export default {
     },
     // 获取用户所有订单
     getUserOrder () {
-      let that = this
-      axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
-        .then(function (res) {
-          console.log(res)
-          for (let index in res.data) {
-            if (res.data[index].status === 'Unpayed') {
-              that.unPayed.push(res.data[index]) // 所有未付款的
-            }
-            if (res.data[index].status === 'Payed') {
-              that.payed.push(res.data[index]) // 待发货的
-            }
-            if (res.data[index].status === 'Send') {
-              that.send.push(res.data[index]) // 待收货
-            }
-            if (res.data[index].status === 'AfterSales') {
-              that.afterSales.push(res.data[index]) // 已完成
-            }
-          }
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
+      // let that = this
+      // axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
+      //   .then(function (res) {
+      //     console.log(res)
+      //     for (let index in res.data) {
+      //       if (res.data[index].status === 'Unpayed') {
+      //         that.unPayed.push(res.data[index]) // 所有未付款的
+      //       }
+      //       if (res.data[index].status === 'Payed') {
+      //         that.payed.push(res.data[index]) // 待发货的
+      //       }
+      //       if (res.data[index].status === 'Send') {
+      //         that.send.push(res.data[index]) // 待收货
+      //       }
+      //       if (res.data[index].status === 'AfterSales') {
+      //         that.afterSales.push(res.data[index]) // 已完成
+      //       }
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error)
+      //   })
     }
   },
   mounted () {
-    this.getUserOrder()
+    // this.getUserOrder()
   }
 }
 </script>

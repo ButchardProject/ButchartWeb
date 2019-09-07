@@ -209,7 +209,7 @@ export default {
               'Content-Type': 'application/json'
             }
           }).then(function (res) {
-            that.$store.dispatch('getPayParam', res) // 支付订单
+            that.$store.dispatch('getPayParam', res, '') // 支付订单
             that.$router.push('pay')
           }).catch(function (error) {
             console.log(error)
@@ -261,7 +261,7 @@ export default {
             }
           }).then(function (res) {
             console.log(res)
-            that.$store.dispatch('getPayParam', res) // 支付订单
+            that.$store.dispatch('getPayParam', res, '') // 支付订单
             that.$router.push('pay')
           }).catch(function (error) {
             console.log(error)

@@ -15,23 +15,32 @@
         <WaitDelivery :payed="payed"/>
         <WaitReceive :send="send"/>
         <Completed :afterSales="afterSales"/>
+        <div>
+          <ul class="pagination" >
+            <li v-show="current != 1" @click="current-- && goto(current)" ><a href="#">上一页</a></li>
+            <li v-for="index in pages" @click="goto(index)" :class="{'active':current == index}" :key="index">
+              <a href="#" >{{index}}</a>
+            </li>
+            <li v-show="sum != current && sum != 0 " @click="current++ && goto(current++)"><a href="#" >下一页</a></li>
+          </ul>
+        </div>
       </mt-tab-container-item>
       <!-- 待付款 -->
       <mt-tab-container-item id="2">
-        <WaitPay :unPayed="unPayed"/>
+        <WaitPay :unPayed="unPayed" :unPayedSum="unPayedSum"/>
       </mt-tab-container-item>
       <!-- 待发货 -->
       <mt-tab-container-item id="3">
-        <WaitDelivery :payed="payed"/>
+        <WaitDelivery :payed="payed" :payedSum="payedSum"/>
         <!-- :waitDeliveyList="waitDeliveyList" -->
       </mt-tab-container-item>
       <!-- 待收货 -->
       <mt-tab-container-item id="4">
-        <WaitReceive :send="send"/>
+        <WaitReceive :send="send" :sendSum="sendSum"/>
       </mt-tab-container-item>
       <!-- 已完成 -->
       <mt-tab-container-item id="5">
-        <Completed :afterSales="afterSales"/>
+        <Completed :afterSales="afterSales" :afterSalesSum="afterSalesSum"/>
       </mt-tab-container-item>
     </mt-tab-container>
   </div>
@@ -53,6 +62,7 @@ import WaitReceive from '@/components/WaitReceive'
 import Completed from '@/components/Completed'
 import config from '@/config'
 import axios from 'axios'
+import { Indicator } from 'mint-ui'
 export default {
   name: 'allorder',
   components: {
@@ -64,41 +74,178 @@ export default {
   data () {
     return {
       selected: '1',
+      page: 1,
       id: [], // 订单id
       unPayed: [], // 未付款的订单
       payed: [], // 待发货
       send: [], // 已发货
-      afterSales: [] // 已完成
+      afterSales: [], // 已完成
+      unPayedSum: 0, // 未付款订单总数
+      payedSum: 0, // 待发货订单总数
+      sendSum: 0, // 已发货订单总数
+      afterSalesSum: 0, // 已完成订单总数
+      sum: 0, // 所有订单数
+      current: 1, // 当前页
+      showItem: 5 // 显示当前几个项目
     }
   },
   created () {
-    // 获取用户所有订单
-    this.getUserOrder()
+    this.getAllOrder()
+    this.getUnpay()
+    this.getPayed()
+    this.getSend()
+    this.getAfterSales()
   },
   // 在vue加载完之后，去获取传过来的选中值
   mounted () {
     this.selected = this.$route.query.selected
   },
   methods: {
-    // 获取用户所有订单
-    getUserOrder () {
-      let that = this
-      axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getUserOwnedTransactions?access_token=' + sessionStorage.getItem('token'))
+    getAllOrder () {
+      let self = this
+      Indicator.open('加载中...')
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'))
         .then(function (res) {
-          console.log(res)
+          self.sum = res.data.length
+          // 如果当前数据是有的就继续操作
           for (let index in res.data) {
             if (res.data[index].status === 'Unpayed') {
-              that.unPayed.push(res.data[index]) // 所有未付款的
+              self.unPayedSum++
             }
             if (res.data[index].status === 'Payed') {
-              that.payed.push(res.data[index]) // 待发货的
+              self.payedSum++
             }
             if (res.data[index].status === 'Send') {
-              that.send.push(res.data[index]) // 待收货
+              self.sendSum++
             }
             if (res.data[index].status === 'AfterSales') {
-              that.afterSales.push(res.data[index]) // 已完成
+              self.afterSalesSum++
             }
+          }
+          Indicator.close()
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    // 分页跳转
+    goto (index) {
+      if (index === this.current) return
+      this.current = index
+      // 这里可以发送ajax请求
+      Indicator.open('加载中...')
+      let self = this
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'))
+        .then(function (res) {
+          console.log(res)
+          // 如果当前数据是有的就继续操作
+          if (res.data.length > 0) {
+            // 把之前的先清空，保证在查询的时候，不会重复推
+            self.$parent.unPayed = []
+            for (let index in res.data) {
+              self.$parent.unPayed.push(res.data[index]) // 所有未付款的
+            }
+            Indicator.close()
+          } else { // 没有直接把表格数据置位0
+            self.$parent.unPayed = []
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    // 获取所有未付款的
+    getUnpay () {
+      Indicator.open('加载中...')
+      let self = this
+      let info = {
+        'status': 'Unpayed'
+      }
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.page + '&access_token=' + sessionStorage.getItem('token'), info)
+        .then(function (res) {
+          console.log(res)
+          // 如果当前数据是有的就继续操作
+          if (res.data.length > 0) {
+            // 把之前的先清空，保证在查询的时候，不会重复推
+            self.unPayed = []
+            for (let index in res.data) {
+              self.unPayed.push(res.data[index]) // 所有未付款的
+            }
+            Indicator.close()
+          } else { // 没有直接把表格数据置位0
+            self.unPayed = []
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    // 获取所有未发货的
+    getPayed () {
+      let self = this
+      let info = {
+        'status': 'Payed'
+      }
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.page + '&access_token=' + sessionStorage.getItem('token'), info)
+        .then(function (res) {
+          console.log(res)
+          // 如果当前数据是有的就继续操作
+          if (res.data.length > 0) {
+            // 把之前的先清空，保证在查询的时候，不会重复推
+            self.payed = []
+            for (let index in res.data) {
+              self.payed.push(res.data[index]) // 所有未付款的
+            }
+          } else { // 没有直接把表格数据置位0
+            self.payed = []
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    // 获取所有已发货的
+    getSend () {
+      let self = this
+      let info = {
+        'status': 'Send'
+      }
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.page + '&access_token=' + sessionStorage.getItem('token'), info)
+        .then(function (res) {
+          console.log(res)
+          // 如果当前数据是有的就继续操作
+          if (res.data.length > 0) {
+            // 把之前的先清空，保证在查询的时候，不会重复推
+            self.send = []
+            for (let index in res.data) {
+              self.send.push(res.data[index]) // 所有未付款的
+            }
+          } else { // 没有直接把表格数据置位0
+            self.send = []
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    // 获取所有售后的
+    getAfterSales () {
+      let self = this
+      let info = {
+        'status': 'AfterSales'
+      }
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.page + '&access_token=' + sessionStorage.getItem('token'), info)
+        .then(function (res) {
+          console.log(res)
+          // 如果当前数据是有的就继续操作
+          if (res.data.length > 0) {
+            // 把之前的先清空，保证在查询的时候，不会重复推
+            self.afterSales = []
+            for (let index in res.data) {
+              self.afterSales.push(res.data[index]) // 所有未付款的
+            }
+          } else { // 没有直接把表格数据置位0
+            self.afterSales = []
           }
         })
         .catch(function (error) {
@@ -112,6 +259,28 @@ export default {
     manager () {
       this.$router.push('/manager')
     }
+  },
+  computed: {
+    pages () {
+      var pag = []
+      if (this.current < this.showItem) { // 如果当前的激活的项 小于要显示的条数
+        // 总页数和要显示的条数那个大就显示多少条
+        var i = Math.min(this.showItem, this.sum)
+        while (i) {
+          pag.unshift(i--)
+        }
+      } else { // 当前页数大于显示页数了
+        var middle = this.current - Math.floor(this.showItem / 2) // 从哪里开始
+        i = this.showItem
+        if (middle > (this.sum - this.showItem)) {
+          middle = (this.sum - this.showItem) + 1
+        }
+        while (i--) {
+          pag.push(middle++)
+        }
+      }
+      return pag
+    }
   }
 }
 </script>
@@ -121,6 +290,36 @@ export default {
   width: 100%;
   background: #F0F0F0;
   font-size: 0.6rem;
+}
+/* 分页相关  */
+li {
+  list-style:none;
+}
+a {
+  text-decoration:none;
+}
+.pagination {
+  position: relative;
+  margin-top: 5%;
+  text-align: right;
+}
+.pagination li{
+  display: inline-block;
+  margin:0 .2rem;
+}
+.pagination li a{
+  padding:.2rem .4rem;
+  display:inline-block;
+  border:1px solid #ddd;
+  background:#fff;
+  color:#0E90D2;
+}
+.pagination li a:hover{
+  background:#eee;
+}
+.pagination li.active a{
+  background:#0E90D2;
+  color:#fff;
 }
 .tabbar {
   background: #F0F0F0;
