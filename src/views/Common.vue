@@ -173,11 +173,18 @@ export default {
 .content {
   margin-top: 2.2rem;
 }
+.divcss {
+  border: 1px solid #000;
+    width: 100%;
+    height: 100px;
+    overflow: hidden
+}
 /* 图片 */
 img {
   display: inline-block;
   width: 4rem;
   height: 6rem;
+  object-fit: cover
 }
 /* div的宽度 */
 .product {

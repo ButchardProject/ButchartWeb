@@ -7,7 +7,7 @@
     <div class="list">
       <ul>
         <li v-for="(item,index) in imgList" v-bind:key="index" class="li-imglist">
-          <img v-bind:src="item.img"/>
+          <img v-bind:src="item"/>
         </li>
       </ul>
     </div>
@@ -17,7 +17,7 @@
 <script>
 import config from '@/config'
 import Navigation from '@/components/Navigation.vue'
-
+import axios from 'axios'
 export default {
   name: 'index',
   components: {
@@ -26,7 +26,7 @@ export default {
   data () {
     return {
       imgList: config.imgList, // banner图片
-      code: '' // 验证之后code
+      code: '', // 验证之后code
     }
   },
   methods: {
@@ -48,7 +48,7 @@ export default {
 <style lang="css" scoped>
   /* 图片的div  */
   .list {
-    margin-top: 2.2rem;
+    margin-top: 2.4rem;
     width: 100%;
   }
   .li-imglist > img {
@@ -57,5 +57,6 @@ export default {
     padding-bottom: 5%;
     height: 12rem;
     list-style-type: none;
+    object-fit: cover;
   }
 </style>

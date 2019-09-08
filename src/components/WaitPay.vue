@@ -63,9 +63,9 @@ export default {
     getDetail (index) {
       console.log(this.transactionsID[index])
     },
-  // 分页跳转
-  goto (index) {
-    if (index === this.current) return
+    // 分页跳转
+    goto (index) {
+      if (index === this.current) return
       this.current = index
       // 这里可以发送ajax请求
       Indicator.open('加载中...')

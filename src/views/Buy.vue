@@ -193,6 +193,7 @@ export default {
 .img {
   width: 100%;
   height: 14rem;
+  object-fit: cover
 }
 /* 价格一栏 */
 .price{

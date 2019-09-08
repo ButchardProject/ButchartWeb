@@ -35,7 +35,7 @@
 <script>
 import config from '@/config'
 import axios from 'axios'
-import { MessageBox, Indicator } from 'mint-ui'
+import { Indicator } from 'mint-ui'
 export default {
   name: 'completed',
   props: {
@@ -65,33 +65,33 @@ export default {
       sessionStorage.setItem('comment', JSON.stringify(this.transactionsID[index])) // 先把当前购买的评价事务ID存下来
       this.$router.push('/comment')
     },
-    goto(index) {
+    goto (index) {
       if (index === this.current) return
-        this.current = index
-        // 这里可以发送ajax请求
-        Indicator.open('加载中...')
-        let self = this
-        let info = {
-          'status': 'AfterSales'
-        }
-        axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'), info)
-          .then(function (res) {
-            console.log(res)
-            // 如果当前数据是有的就继续操作
-            if (res.data.length > 0) {
-              // 把之前的先清空，保证在查询的时候，不会重复推
-              self.$parent.afterSales = []
-              for (let index in res.data) {
-                self.$parent.afterSales.push(res.data[index]) // 所有未付款的
-              }
-              Indicator.close()
-            } else { // 没有直接把表格数据置位0
-              self.$parent.afterSales = []
+      this.current = index
+      // 这里可以发送ajax请求
+      Indicator.open('加载中...')
+      let self = this
+      let info = {
+        'status': 'AfterSales'
+      }
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'), info)
+        .then(function (res) {
+          console.log(res)
+          // 如果当前数据是有的就继续操作
+          if (res.data.length > 0) {
+            // 把之前的先清空，保证在查询的时候，不会重复推
+            self.$parent.afterSales = []
+            for (let index in res.data) {
+              self.$parent.afterSales.push(res.data[index]) // 所有未付款的
             }
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
+            Indicator.close()
+          } else { // 没有直接把表格数据置位0
+            self.$parent.afterSales = []
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   },
   watch: {

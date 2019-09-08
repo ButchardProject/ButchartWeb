@@ -11,9 +11,8 @@ let config = {
   // 上传图片logo
   add: require('../assets/logo/takePhoto.png'),
   // index的列表图片资源
-  imgList: [{ img: require('../assets/images/list01.png') },
-    { img: require('../assets/images/list01.png') },
-    { img: require('../assets/images/list01.png') }]
+  imgList: ['http://www.thebutchart.cn/homepage/1.jpg', 'http://www.thebutchart.cn/homepage/2.jpg',
+    'http://www.thebutchart.cn/homepage/3.jpg']
 }
 
 let otherConfig = {
