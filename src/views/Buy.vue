@@ -130,9 +130,11 @@ export default {
           'flowerName': this.name,
           'price': this.price,
           'flowerNum': this.value,
-          'type': this.type
+          'type': this.type,
+          'img': this.img[0]
         })
         sessionStorage.setItem('cart', JSON.stringify(cart))
+        sessionStorage.setItem('type', JSON.stringify(this.type))
         this.$router.push(
           {
             'name': 'confirmorder',

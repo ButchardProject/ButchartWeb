@@ -26,7 +26,7 @@ export default {
   data () {
     return {
       imgList: config.imgList, // banner图片
-      code: '', // 验证之后code
+      code: '' // 验证之后code
     }
   },
   methods: {
@@ -39,6 +39,14 @@ export default {
   created () {
     if (JSON.parse(sessionStorage.getItem('userInfo'))) {
       this.code = this.getCode('code')
+      // 验证登陆
+      axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone +
+       '/getOpenIdByCode?code=' + this.code + '&access_token=' + sessionStorage.getItem('token'))
+        .then(function (res) {
+          console.log(res)
+        }).catch(function (error) {
+          console.log(error)
+        })
       sessionStorage.setItem('code', this.code)
     }
   }

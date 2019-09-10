@@ -14,7 +14,7 @@
     <!-- <div class="content"> -->
         <!-- 选中checkbox -->
         <input :class="['checkbox', opened ? 'div-swiper-open' : 'div-swiper-close']" type="checkbox" @click="select(index)" v-model="checkList" :value="index">
-        <img class="photo" src="../assets/images/list01.png"/>
+        <img class="photo" :src="img[index]"/>
         <div class="content-2">
           <div class="name">{{name[index]}}</div>
           <div class="div-cal">
@@ -57,7 +57,8 @@ export default {
       tip: '请先添加购物车', // 如果没有收货地址就提示用户
       quantity: [], // 当前购物车购买的数量，可修改
       name: [], // 购物车中的名称
-      num: '', // 购物车中的数量
+      img: [], // 购物车中的图片
+      num: sessionStorage.getItem('unread'), // 购物车中的数量
       price: [], // 购物车中产品的单价
       productId: [], // 购物车的产品id
       total: 0, // 当前总价
@@ -89,19 +90,16 @@ export default {
         let that = this
         axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/updateShoppingList?access_token=' + sessionStorage.getItem('token'), info)
           .then(function (res) {
-            console.log(res)
-            if (res.status === 200) {
-              that.num = res.data.length
-              sessionStorage.setItem('unread', that.num)
-              for (let index in res.data) {
-                that.name.push(res.data[index].name)
-                that.price.push(res.data[index].price)
-                that.quantity.push(res.data[index].quantity)
-                that.productId.push(res.data[index].productId)
-              }
-              that.isEdit = false // 先取消编辑
-              that.getShoppingList() // 在重新获取服务器数据
+            that.num = res.data.length
+            sessionStorage.setItem('unread', that.num)
+            for (let index in res.data) {
+              that.name.push(res.data[index].name)
+              that.price.push(res.data[index].price)
+              that.quantity.push(res.data[index].quantity)
+              that.productId.push(res.data[index].productId)
             }
+            that.isEdit = false // 先取消编辑
+            that.getShoppingList() // 在重新获取服务器数据
           })
           .catch(function (error) {
             console.log(error)
@@ -175,6 +173,7 @@ export default {
                 'flowerName': this.name[j],
                 'price': this.price[j],
                 'flowerNum': this.quantity[j],
+                'img': this.img[j],
                 'type': this.type[j]
               })
             }
@@ -185,31 +184,31 @@ export default {
             'flowerName': this.name[this.checkList[i]],
             'price': this.price[this.checkList[i]],
             'flowerNum': this.quantity[this.checkList[i]],
+            'img': this.img[this.checkList[i]],
             'type': this.type[this.checkList[i]]
           })
         }
         // 将当前选中购物车的数据提交到确认订单页
         sessionStorage.setItem('cart', JSON.stringify(cart))
-        this.$router.push('/confirmorder')
         let that = this
         // 将当前未选中的数据更新到服务器
         axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/updateShoppingList?access_token=' + sessionStorage.getItem('token'), uncart)
           .then(function (res) {
-            if (res.status === 200) {
-              that.num = res.data.length
-              sessionStorage.setItem('unread', that.num)
-              for (let index in res.data) {
-                that.name.push(res.data[index].name)
-                that.price.push(res.data[index].price)
-                that.quantity.push(res.data[index].quantity)
-                that.productId.push(res.data[index].productId)
-                that.type.push(res.data[index].type)
-              }
+            let unread = sessionStorage.getItem('unread')
+            unread = parseInt(unread) - cart.length
+            sessionStorage.setItem('unread', unread) // 减少未读数
+            for (let index in res.data) {
+              that.name.push(res.data[index].name)
+              that.price.push(res.data[index].price)
+              that.quantity.push(res.data[index].quantity)
+              that.productId.push(res.data[index].productId)
+              that.type.push(res.data[index].type)
             }
           })
           .catch(function (error) {
             console.log(error)
           })
+        this.$router.push('/confirmorder')
       } else {
         MessageBox('提示', '请选择结算商品')
       }
@@ -219,16 +218,15 @@ export default {
       let that = this
       axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getShoppingList?access_token=' + sessionStorage.getItem('token'))
         .then(function (res) {
-          if (res.status === 200) {
-            that.num = res.data.length
-            sessionStorage.setItem('unread', that.num)
-            for (let index in res.data) {
-              that.name.push(res.data[index].name)
-              that.price.push(res.data[index].price)
-              that.quantity.push(res.data[index].quantity)
-              that.productId.push(res.data[index].productId)
-              that.type.push(res.data[index].type)
-            }
+          that.num = res.data.length
+          sessionStorage.setItem('unread', that.num)
+          for (let index in res.data) {
+            that.name.push(res.data[index].name)
+            that.img.push(res.data[index].pics[0])
+            that.price.push(res.data[index].price)
+            that.quantity.push(res.data[index].quantity)
+            that.productId.push(res.data[index].productId)
+            that.type.push(res.data[index].type)
           }
         })
         .catch(function (error) {
@@ -354,6 +352,7 @@ export default {
   width: 4rem;
   height: 3rem;
   padding-left: .2rem;
+  object-fit: cover;
 }
 /* 花的名称 */
 .name {

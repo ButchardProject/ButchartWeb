@@ -18,7 +18,7 @@
     <!-- 订单行 -->
     <div class="div-order">
       <div class="order-info" v-for="(item,index) in cart" :key="index">
-        <img src="../assets/images/list01.png"/>
+        <img :src="item.img"/>
         <span class="info-name">【{{item.flowerName}}】</span>
         <span class="info-number">x{{item.flowerNum}}</span>
         <span class="info-price">¥{{item.price}}</span>
@@ -170,7 +170,8 @@ export default {
               'productId': info[i].productId,
               'name': info[i].flowerName,
               'price': info[i].price,
-              'quantity': info[i].flowerNum
+              'quantity': info[i].flowerNum,
+              'img': info[i].img
             }
             productList.push(list)
           }
@@ -221,7 +222,8 @@ export default {
               'productId': info[i].productId,
               'name': info[i].flowerName,
               'price': info[i].price,
-              'quantity': info[i].flowerNum
+              'quantity': info[i].flowerNum,
+              'img': info[i].img
             }
             productList.push(list)
           }
@@ -260,7 +262,7 @@ export default {
               'Content-Type': 'application/json'
             }
           }).then(function (res) {
-            console.log(res)
+            // console.log(res)
             that.$store.dispatch('getPayParam', res, '') // 支付订单
             that.$router.push('pay')
           }).catch(function (error) {
@@ -449,6 +451,7 @@ export default {
     display: inline-block;
     width: 30%;
     height: 15%;
+    object-fit: cover
 }
 /* 订单中的名字 */
 .info-name {

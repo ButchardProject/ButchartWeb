@@ -116,7 +116,7 @@ const router = new Router({
         requireAuth: true
       },
       beforeEnter: (to, from, next) => {
-        if (from.name === 'buy' || from.name === 'express' || from.name === 'takeself') {
+        if (from.name === 'buy' || from.name === 'express' || from.name === 'takeself' || from.name === 'mycart') {
           next()
         } else {
           next('/')

@@ -99,7 +99,7 @@ export default {
           // self.$router.push('/')
           }).catch(function (error) {
             console.log(error)
-            MessageBox('登陆失败', '请检查手机号与验证码是否正确')
+            MessageBox('登录失败', '请检查手机号与验证码是否正确')
           })
       }
     }

@@ -69,7 +69,7 @@ export default {
       visible: false, // popup的显示
       flag: '', // 中转index
       current: '', // 当前选中的门店
-      startDate: new Date(), // 当前日期
+      startDate: '', // 当前日期
       endDate: new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 30), // 一个月后结束日期
       startHour: 9, // 早9
       endHour: 18 // 晚6
@@ -154,6 +154,17 @@ export default {
             }
           })
       }
+    },
+    // 如果是听花的话，时间选3天后
+    setTime () {
+      if (JSON.parse(sessionStorage.getItem('type'))) {
+        let type = JSON.parse(sessionStorage.getItem('type'))
+        if (type === '听花') {
+          this.startDate = new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 3)
+        } else {
+          this.startDate = new Date()
+        }
+      }
     }
   },
   // vue加载完之后开始获取地址
@@ -165,7 +176,6 @@ export default {
       this.time = JSON.parse(sessionStorage.getItem('takeTime')) // 时间先取了
       this.current = JSON.parse(sessionStorage.getItem('takeSelect'))
     } else {
-      console.log(this.$route.query.isFirst)
       sessionStorage.removeItem('takeSelect')
       this.current = ''
     }
@@ -175,6 +185,9 @@ export default {
     num: function () {
       return this.$store.state.storeLists.storeNum
     }
+  },
+  created () {
+    this.setTime()
   }
 }
 </script>

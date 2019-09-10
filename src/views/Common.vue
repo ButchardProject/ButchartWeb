@@ -76,7 +76,6 @@ export default {
       axios.get(config.url + '/seriesId/' + seriesId[id] + '/getProductsBySeries')
         .then((res) => {
           for (let i in res.data) {
-            console.log(res.data[i].pics)
             if (res.data[i].type === '听花') {
               // 听花
               self.thProductId.push(res.data[i]._id)
@@ -88,12 +87,12 @@ export default {
               self.thImg.push(res.data[i].pics)
             } else {
               // 非听花
-              self.productImg.push(res.data[i].pics[0])
               self.productId.push(res.data[i]._id)
               self.productName.push(res.data[i].name)
               self.productPrice.push(res.data[i].price)
               self.productDesc.push(res.data[i].description)
               self.productType.push(res.data[i].type)
+              self.productImg.push(res.data[i].pics[0])
               self.img.push(res.data[i].pics)
             }
           }
@@ -155,12 +154,16 @@ export default {
           this.productPrice = []
           this.productType = []
           this.productDesc = []
+          this.productImg = []
+          this.img = []
           // 听花
           this.thProductId = []
           this.thProductName = []
           this.thProductPrice = []
           this.thProductType = []
           this.thProductDesc = []
+          this.thProductImg = []
+          this.thImg = []
           this.id = val.query.id // 获取当前路由更新的id
           this.getProduct(this.id) // 重新获取当前数据
         }
