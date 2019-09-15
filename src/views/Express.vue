@@ -52,7 +52,7 @@ export default {
       discountNormal: '', // 花束价格
       discountOther: '', // 伴手礼价格
       isNormal: true, // 花束是正常，伴手礼是不正常的
-      startDate: new Date(), // 当前日期
+      startDate: '', // 当前日期
       endDate: new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 30), // 一个月后结束日期
       deliveryMethod: [], // 配送方式
       perArea: ['上城区', '下城区', '江干区', '拱墅区', '西湖区', '滨江区'], // 专人配送区域
@@ -60,6 +60,7 @@ export default {
     }
   },
   created () {
+    this.setTime() // 设置起始时间
     this.handleAddress() // 处理地址
     // 获取运费地址
     let that = this
@@ -117,6 +118,17 @@ export default {
           }
         } else { // 如果是顺丰的话直接显示
           this.current = index
+        }
+      }
+    },
+    // 如果是听花的话，时间选3天后
+    setTime () {
+      if (JSON.parse(sessionStorage.getItem('type'))) {
+        let type = JSON.parse(sessionStorage.getItem('type'))
+        if (type === '听花') {
+          this.startDate = new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 1)
+        } else {
+          this.startDate = new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 3)
         }
       }
     },

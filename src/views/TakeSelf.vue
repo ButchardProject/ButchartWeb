@@ -159,10 +159,10 @@ export default {
     setTime () {
       if (JSON.parse(sessionStorage.getItem('type'))) {
         let type = JSON.parse(sessionStorage.getItem('type'))
-        if (type === '非听花') {
-          this.startDate = new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 3)
-        } else {
+        if (type === '听花') {
           this.startDate = new Date()
+        } else {
+          this.startDate = new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 3)
         }
       }
     }

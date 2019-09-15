@@ -95,8 +95,8 @@ export default {
             self.$store.dispatch('getAddUnread', res.data.shoppingCart.length) // 更新购物车未读数
             self.$store.dispatch('setUser', self.phone)
             self.$store.dispatch('saveToken', res.data.token.id) // 保存当前token到store
-            w.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx66142d5363835ef3&redirect_uri=https://www.thebutchart.cn/&response_type=code&scope=snsapi_base&state=123#wechat_redirect'
-          // self.$router.push('/')
+            // w.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx66142d5363835ef3&redirect_uri=https://www.thebutchart.cn/&response_type=code&scope=snsapi_base&state=123#wechat_redirect'
+          self.$router.push('/')
           }).catch(function (error) {
             console.log(error)
             MessageBox('登录失败', '请检查手机号与验证码是否正确')
