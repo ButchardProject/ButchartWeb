@@ -99,7 +99,7 @@ export default {
     this.type = flowerInfo.type
     this.img = flowerInfo.img
     let flag = flowerInfo.flag
-    if (flag === 1) {
+    if (flag === 2) {
       this.day = 1
     } else {
       this.day = 3

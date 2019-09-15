@@ -184,9 +184,7 @@ export default {
               'Content-Type': 'application/json'
             }
           }).then(function (res) {
-            if (res.status === 200) {
-              self.$router.push('location')
-            }
+            self.$router.push('location')
           }).catch(function (error) {
             console.log(error)
           })
@@ -210,9 +208,7 @@ export default {
             }
           }).then(function (res) {
             console.log(res)
-            if (res.status === 200) {
-              self.$router.push('location')
-            }
+            self.$router.push('location')
           }).catch(function (error) {
             console.log(error)
           })
