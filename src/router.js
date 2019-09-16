@@ -32,7 +32,7 @@ const router = new Router({
         requireAuth: true
       },
       beforeEnter: (to, from, next) => {
-        if (from.name === 'common') {
+        if (from.name === 'common' || from.name === 'index') {
           next()
         } else {
           next('/')

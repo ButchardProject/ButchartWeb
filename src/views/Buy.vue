@@ -91,18 +91,21 @@ export default {
   },
   // 在页面创建的时候去获取前面页面过来的数据
   created () {
-    let flowerInfo = JSON.parse(sessionStorage.getItem('currentFlowerInfo'))
-    this.name = flowerInfo.flowerName
-    this.price = flowerInfo.price
-    this.detail = flowerInfo.desc
-    this.productId = flowerInfo.productId
-    this.type = flowerInfo.type
-    this.img = flowerInfo.img
-    let flag = flowerInfo.flag
-    if (flag === 2) {
-      this.day = 1
-    } else {
-      this.day = 3
+    if (JSON.parse(sessionStorage.getItem('currentFlowerInfo'))) {
+      let flowerInfo = JSON.parse(sessionStorage.getItem('currentFlowerInfo'))
+      this.name = flowerInfo.flowerName
+      this.price = flowerInfo.price
+      this.detail = flowerInfo.desc
+      this.productId = flowerInfo.productId
+      this.type = flowerInfo.type
+      this.img = flowerInfo.img
+      let flag = flowerInfo.flag
+      // 如果是非听花的才显示3
+      if (flag === 2) {
+        this.day = 1
+      } else {
+        this.day = 3
+      }
     }
   },
   methods: {

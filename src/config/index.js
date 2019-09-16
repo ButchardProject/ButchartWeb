@@ -9,10 +9,7 @@ let config = {
   // 购物车logo
   car: require('../assets/logo/car.png'),
   // 上传图片logo
-  add: require('../assets/logo/takePhoto.png'),
-  // index的列表图片资源
-  imgList: ['http://www.thebutchart.cn/homepage/1.jpg', 'http://www.thebutchart.cn/homepage/2.jpg',
-    'http://www.thebutchart.cn/homepage/3.jpg']
+  add: require('../assets/logo/takePhoto.png')
 }
 
 let otherConfig = {
