@@ -37,7 +37,8 @@
         </p>
         <hr>
         <div class="detail">
-          {{detail}}
+          <p v-html="detail">{{detail}}</p>
+          <!-- <p></p> -->
         </div>
     </div>
     <!-- 底部fixed foot -->
@@ -262,11 +263,15 @@ export default {
 }
 /* 产品详细介绍 */
 .detail {
-  text-indent: 2em;
-  margin-top: 2%;
-  font-size: 0.4rem;
-  letter-spacing: 2px;
-  margin: 0 3%;
+  font-size: .6rem;
+  letter-spacing: 4px;
+  /* text-indent: 2em; */
+  text-align: center;
+  line-height: 20px;
+  padding: 0 .5rem;
+}
+/* 底部补白  */
+.detail > p {
   padding-bottom: 2rem;
 }
 /* 页脚 */

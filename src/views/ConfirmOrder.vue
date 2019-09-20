@@ -99,8 +99,8 @@ export default {
           this.isSelf = true
           this.isExpress = false
           this.ship = '到店自取'
-          this.favour = '即享原花价9折优惠'
-          this.totalPrice = this.totalPrice * 0.9 + this.freight
+          this.favour = '即享原花价8折优惠'
+          this.totalPrice = this.totalPrice * 0.8 + this.freight
         } else {
           // 顺丰
           this.isSelf = false
@@ -125,8 +125,8 @@ export default {
             } else {
               discountPrice = parseInt(discount.discountNormal)
               this.ship = '快递配送 ' + this.freight + '¥'
-              this.favour = '即享原花价9折优惠'
-              this.totalPrice = this.totalPrice * 0.9 + this.freight + discountPrice
+              this.favour = '即享原花价8折优惠'
+              this.totalPrice = this.totalPrice * 0.8 + this.freight + discountPrice
             }
           }
         }

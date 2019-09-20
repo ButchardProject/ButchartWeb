@@ -49,26 +49,9 @@ export default {
           console.log(error)
         })
     },
-    // 点击跳转到buy页，获取信息
+    // 点击跳转到common页，获取信息
     getImageInfo (index) {
-      let self = this
-      // 获取首页图片信息并跳转
-      axios.get(config.url + '/product/' + this.imgId[index] + '/getProductById')
-        .then(function (res) {
-          let flowerInfo = {
-            'productId': res.data._id,
-            'flowerName': res.data.name,
-            'price': res.data.price,
-            'desc': res.data.description,
-            'type': res.data.type,
-            'img': res.data.pics,
-            'flag': 1 // 标志位，用于提示1还是3
-          }
-          sessionStorage.setItem('currentFlowerInfo', JSON.stringify(flowerInfo))
-          self.$router.push({ name: 'buy', query: { id: index } })
-        }).catch(function (error) {
-          console.log(error)
-        })
+      this.$router.push({ name: 'common', query: { id: index } })
     }
   },
   created () {

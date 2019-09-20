@@ -11,7 +11,8 @@
           <img :src="thProductImg[thIndex]">
           <div class="desc">
             <div class="desc-name">{{thProductName[thIndex]}}</div>
-            <p class="desc-desc">{{thProductDesc[thIndex]}}</p>
+            <p class="desc-desc">{{thProductTitle[thIndex]}}</p>
+            <!-- <p class="desc-desc">{{thProductDesc[thIndex]}}</p> -->
             <div class="desc-price">¥{{thProductPrice[thIndex]}}</div>
           </div>
         </div>
@@ -25,7 +26,8 @@
           <img :src="productImg[index]"/>
           <div class="desc">
             <div class="desc-name">{{productName[index]}}</div>
-            <p class="desc-desc">{{productDesc[index]}}</p>
+            <p class="desc-desc">{{productTitle[index]}}</p>
+            <!-- <p class="desc-desc">{{productDesc[index]}}</p> -->
             <div class="desc-price">¥{{productPrice[index]}}</div>
           </div>
         </div>
@@ -52,6 +54,7 @@ export default {
       productDesc: [], // 系列产品的描述
       productType: [], // 系列产品的类型
       productImg: [], // 系列产品的图片
+      productTitle: [], // 系列产品的标题
       img: [], // 花束图片
       // 听花系列产品信息
       thProductId: [], // 系列产品的id
@@ -60,6 +63,7 @@ export default {
       thProductDesc: [], // 系列产品的描述
       thProductType: [], // 系列产品的类型
       thProductImg: [], // 系列产品的类型
+      thProductTitle: [], // 系列产品的标题
       thImg: [], // 听花图片
       id: this.$route.query.id // 当前第几个index
     }
@@ -75,6 +79,7 @@ export default {
       let seriesId = JSON.parse(sessionStorage.getItem('seriesId'))
       axios.get(config.url + '/seriesId/' + seriesId[id] + '/getProductsBySeries')
         .then((res) => {
+          console.log(res.data)
           for (let i in res.data) {
             if (res.data[i].type === '听花') {
               // 听花
@@ -83,6 +88,7 @@ export default {
               self.thProductPrice.push(res.data[i].price)
               self.thProductDesc.push(res.data[i].description)
               self.thProductType.push(res.data[i].type)
+              self.thProductTitle.push(res.data[i].title)
               self.thProductImg.push(res.data[i].pics[0])
               self.thImg.push(res.data[i].pics)
             } else {
@@ -92,6 +98,7 @@ export default {
               self.productPrice.push(res.data[i].price)
               self.productDesc.push(res.data[i].description)
               self.productType.push(res.data[i].type)
+              self.productTitle.push(res.data[i].title)
               self.productImg.push(res.data[i].pics[0])
               self.img.push(res.data[i].pics)
             }
@@ -155,6 +162,7 @@ export default {
           this.productType = []
           this.productDesc = []
           this.productImg = []
+          this.productTitle = []
           this.img = []
           // 听花
           this.thProductId = []
@@ -163,6 +171,7 @@ export default {
           this.thProductType = []
           this.thProductDesc = []
           this.thProductImg = []
+          this.thProductTitle = []
           this.thImg = []
           this.id = val.query.id // 获取当前路由更新的id
           this.getProduct(this.id) // 重新获取当前数据
@@ -215,7 +224,12 @@ img {
   width: 100%;
 }
 .desc {
-  font-size: 0.6rem;
+  font-size: .6rem;
+  margin-top: .2rem;
+}
+.desc-name {
+  overflow: hidden;
+  border-bottom: 0.5px solid #CFCFCF;
 }
 .desc-desc {
   overflow: hidden;

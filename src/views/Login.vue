@@ -145,6 +145,7 @@ html body{
   color: #FF0000;
   font-size: 0.6rem;
   text-align: left;
+  padding-top: .3rem
 }
 .div-code{
   width: 100%;
