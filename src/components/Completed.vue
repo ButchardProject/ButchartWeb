@@ -7,7 +7,7 @@
         <span class="text">等待买家付款</span>
       </div>
       <div class="div-content">
-        <img class="photo" src="../assets/images/list01.png"/>
+        <img class="photo" :src="img[index]"/>
         <span class="name">【{{name[index]}}】</span>
         <span class="price">¥{{price[index]}}</span>
         <span class="number">x{{quantity[index]}}</span>
@@ -52,6 +52,7 @@ export default {
       current: 1, // 当前页
       showItem: 5, // 显示当前几个项目
       allpage: 0, // 分页总数
+      img: [], // 花的图片
       name: [], // 花名
       totalPrice: [], // 价格
       quantity: [], // 购买的数量
@@ -72,7 +73,8 @@ export default {
       Indicator.open('加载中...')
       let self = this
       let info = {
-        'status': 'AfterSales'
+        'status': 'AfterSales',
+        'userId': JSON.parse(sessionStorage.getItem('userInfo')).phone
       }
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
@@ -100,6 +102,7 @@ export default {
         for (let i = 0; i < val.length; i++) {
           this.transactionsID.push(val[i]._id)
           for (let j = 0; j < val[i].productList.length; j++) {
+            this.img.push(val[i].productList[j].img)
             this.name.push(val[i].productList[j].name)
             this.price.push(val[i].productList[j].price)
             this.quantity.push(val[i].productList[j].quantity)
@@ -236,9 +239,10 @@ a {
 .photo {
   display: inline-block;
   /* 图片自适应 */
-  width: 30%;
-  height: 40%;
+  width: 4rem;
+  height: 3rem;
   padding-bottom: 2%;
+  object-fit: cover;
 }
 /* 花的名称 */
 .name {

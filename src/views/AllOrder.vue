@@ -103,8 +103,11 @@ export default {
   methods: {
     getAllOrder () {
       let self = this
+      let info = {
+        'userId': JSON.parse(sessionStorage.getItem('userInfo')).phone
+      }
       Indicator.open('加载中...')
-      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'))
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
           self.sum = res.data.length
           // 如果当前数据是有的就继续操作
@@ -135,7 +138,10 @@ export default {
       // 这里可以发送ajax请求
       Indicator.open('加载中...')
       let self = this
-      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'))
+      let info = {
+        'userId': JSON.parse(sessionStorage.getItem('userInfo')).phone
+      }
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
           console.log(res)
           // 如果当前数据是有的就继续操作
@@ -159,15 +165,17 @@ export default {
       Indicator.open('加载中...')
       let self = this
       let info = {
-        'status': 'Unpayed'
+        'status': 'Unpayed',
+        'userId': JSON.parse(sessionStorage.getItem('userInfo')).phone
       }
-      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.page + '&access_token=' + sessionStorage.getItem('token'), info)
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
           console.log(res)
           // 如果当前数据是有的就继续操作
           if (res.data.length > 0) {
             // 把之前的先清空，保证在查询的时候，不会重复推
             self.unPayed = []
+            self.unPayedSum = res.data.length
             for (let index in res.data) {
               self.unPayed.push(res.data[index]) // 所有未付款的
             }
@@ -184,9 +192,10 @@ export default {
     getPayed () {
       let self = this
       let info = {
-        'status': 'Payed'
+        'status': 'Payed',
+        'userId': JSON.parse(sessionStorage.getItem('userInfo')).phone
       }
-      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.page + '&access_token=' + sessionStorage.getItem('token'), info)
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
           console.log(res)
           // 如果当前数据是有的就继续操作
@@ -208,9 +217,10 @@ export default {
     getSend () {
       let self = this
       let info = {
-        'status': 'Send'
+        'status': 'Send',
+        'userId': JSON.parse(sessionStorage.getItem('userInfo')).phone
       }
-      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.page + '&access_token=' + sessionStorage.getItem('token'), info)
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
           console.log(res)
           // 如果当前数据是有的就继续操作
@@ -232,9 +242,10 @@ export default {
     getAfterSales () {
       let self = this
       let info = {
-        'status': 'AfterSales'
+        'status': 'AfterSales',
+        'userId': JSON.parse(sessionStorage.getItem('userInfo')).phone
       }
-      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.page + '&access_token=' + sessionStorage.getItem('token'), info)
+      axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
           console.log(res)
           // 如果当前数据是有的就继续操作
