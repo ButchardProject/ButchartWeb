@@ -39,7 +39,7 @@ export default {
     getHomePics () {
       let self = this
       // 获取首页图片
-      axios.get('https://www.thebutchart.cn:4000/api/WorkspaceFacadeAPIs/getHomePagePics')
+      axios.get('https://www.thebutchart.cn/api/WorkspaceFacadeAPIs/getHomePagePics')
         .then(function (res) {
           for (let i in res.data) {
             self.imgId.push(i)
