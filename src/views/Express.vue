@@ -206,6 +206,10 @@ export default {
         MessageBox('提示', '您还未选择配送方式')
         return
       }
+      if (this.date === '') {
+        MessageBox('提示', '您还未选择配送时间')
+        return
+      }
       if (this.address && this.current !== '') {
         // 清空self数据
         sessionStorage.removeItem('takeDate')
@@ -271,7 +275,7 @@ li {
     font-size: 14px;
     color: #BDBDBD;
     display: inline-block;
-    width: 40%;
+    width: 50%;
     margin-left:10%;
 }
 /* popup中的 */
