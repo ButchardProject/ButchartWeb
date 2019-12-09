@@ -72,7 +72,8 @@ export default {
       }
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
+          Indicator.close()
           // 如果当前数据是有的就继续操作
           if (res.data.length > 0) {
             // 把之前的先清空，保证在查询的时候，不会重复推
@@ -80,7 +81,6 @@ export default {
             for (let index in res.data) {
               self.$parent.send.push(res.data[index]) // 所有未付款的
             }
-            Indicator.close()
           } else { // 没有直接把表格数据置位0
             self.$parent.send = []
           }

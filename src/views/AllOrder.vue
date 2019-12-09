@@ -110,6 +110,11 @@ export default {
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
           self.sum = res.data.length
+          // 为了不影响下次使用效果
+          self.unPayedSum = 0
+          self.payedSum = 0
+          self.sendSum = 0
+          self.afterSalesSum = 0
           // 如果当前数据是有的就继续操作
           for (let index in res.data) {
             if (res.data[index].status === 'Unpayed') {
@@ -143,7 +148,7 @@ export default {
       }
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
           // 如果当前数据是有的就继续操作
           if (res.data.length > 0) {
             // 把之前的先清空，保证在查询的时候，不会重复推
@@ -170,7 +175,7 @@ export default {
       }
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
           // 如果当前数据是有的就继续操作
           if (res.data.length > 0) {
             // 把之前的先清空，保证在查询的时候，不会重复推
@@ -197,7 +202,7 @@ export default {
       }
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
           // 如果当前数据是有的就继续操作
           if (res.data.length > 0) {
             // 把之前的先清空，保证在查询的时候，不会重复推
@@ -222,7 +227,7 @@ export default {
       }
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
           // 如果当前数据是有的就继续操作
           if (res.data.length > 0) {
             // 把之前的先清空，保证在查询的时候，不会重复推
@@ -247,7 +252,7 @@ export default {
       }
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
           // 如果当前数据是有的就继续操作
           if (res.data.length > 0) {
             // 把之前的先清空，保证在查询的时候，不会重复推

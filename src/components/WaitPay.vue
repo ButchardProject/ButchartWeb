@@ -23,11 +23,15 @@
     </div>
     <div>
       <ul class="pagination" >
-            <li v-show="current != 1" @click="current-- && goto(current)" ><a href="#">上一页</a></li>
-            <li v-for="index in pages" @click="goto(index)" :class="{'active':current == index}" :key="index">
-              <a href="#" >{{index}}</a>
-            </li>
-            <li v-show="allpage != current && allpage != 0 " @click="current++ && goto(current++)"><a href="#" >下一页</a></li>
+          <li v-show="current != 1" @click="current-- && goto(current)" >
+            <a href="#">上一页</a>
+          </li>
+          <li v-for="index in pages" @click="goto(index)" :class="{'active':current == index}" :key="index">
+            <a href="#" >{{index}}</a>
+          </li>
+          <li v-show="allpage != current && allpage != 0 " @click="current++ && goto(current++)">
+            <a href="#" >下一页</a>
+          </li>
         </ul>
     </div>
   </div>
@@ -77,7 +81,8 @@ export default {
       }
       axios.post(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/searchTransactionWithAddress?page=' + this.current + '&access_token=' + sessionStorage.getItem('token'), info)
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
+          Indicator.close()
           // 如果当前数据是有的就继续操作
           if (res.data.length > 0) {
             // 把之前的先清空，保证在查询的时候，不会重复推
@@ -85,7 +90,6 @@ export default {
             for (let index in res.data) {
               self.$parent.unPayed.push(res.data[index]) // 所有未付款的
             }
-            Indicator.close()
           } else { // 没有直接把表格数据置位0
             self.$parent.unPayed = []
           }
@@ -100,7 +104,7 @@ export default {
       axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone +
        '/transaction/' + this.transactionsID[index] + '/repayTransaction?&access_token=' + sessionStorage.getItem('token'))
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
           // 重新去刷新一下
           self.$store.dispatch('getPayParam', res, this.transactionsID[index]) // 支付订单
           self.$router.push('pay')
@@ -115,7 +119,7 @@ export default {
         if (action === 'confirm') {
           axios.put(config.manager + '/transaction/' + this.transactionsID[index] + '/close?&access_token=' + sessionStorage.getItem('token'))
             .then(function (res) {
-              console.log(res)
+              // console.log(res)
               // 重新去刷新一下
               self.$parent.$parent.$parent.getUserOrder()
             }).catch(function (error) {
@@ -127,7 +131,6 @@ export default {
   },
   watch: {
     unPayed (val, oldVal) {
-      console.log(val)
       if (val) {
         for (let i = 0; i < val.length; i++) {
           this.transactionsID.push(val[i]._id)
