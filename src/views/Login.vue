@@ -53,7 +53,7 @@ export default {
       axios.post(config.url + '/sendMessage/' + this.phone + '?operation=register')
         .then(function (res) {
           console.log(res)
-          console.log(res.data)
+          // console.log(res.data)
           if (!that.canClick) { }
           that.canClick = false
           that.content = that.totalTime + 's后重新发送'
@@ -82,7 +82,7 @@ export default {
         // 验证登陆
         axios.post(config.url + '/login?tel=' + this.phone + '&code=' + this.code)
           .then(function (res) {
-            console.log(res)
+            // console.log(res)
             let userInfo = {
               'phone': self.phone,
               'code': self.code

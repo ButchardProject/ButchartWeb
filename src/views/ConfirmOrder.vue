@@ -339,7 +339,7 @@ export default {
     let that = this
     axios.get(config.url + '/getFlorists?access_token=' + sessionStorage.getItem('token'))
       .then(function (res) {
-        console.log(res.data)
+        // console.log(res.data)
         for (let index in res.data) {
           that.floristUserId.push(res.data[index].florist.userId) // 先把花艺师的id推进去
           that.floristName.push(res.data[index].fullname) // 花艺师的name推进去

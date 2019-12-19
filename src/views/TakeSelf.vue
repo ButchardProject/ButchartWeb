@@ -106,9 +106,8 @@ export default {
       if (nowDay >= 0 && nowDay <= 9) {
         nowDay = '0' + nowDay
       }
-      var str = nowYear + '年' + nowMonth + '月' + nowDay + '日'
-      var takeDate = nowYear + '-' + nowMonth + '-' + nowDay
-      sessionStorage.setItem('takeMainDate', JSON.stringify(takeDate))
+      var str = nowYear + '-' + nowMonth + '-' + nowDay
+      sessionStorage.setItem('takeMainDate', JSON.stringify(str))
       return str
     },
     // 点击出现popup

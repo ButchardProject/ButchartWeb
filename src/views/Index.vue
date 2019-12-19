@@ -62,7 +62,7 @@ export default {
       axios.put(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone +
        '/getOpenIdByCode?code=' + this.code + '&access_token=' + sessionStorage.getItem('token'))
         .then(function (res) {
-          console.log(res)
+          // console.log(res)
         }).catch(function (error) {
           console.log(error)
         })

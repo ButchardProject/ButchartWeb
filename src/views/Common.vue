@@ -79,7 +79,7 @@ export default {
       let seriesId = JSON.parse(sessionStorage.getItem('seriesId'))
       axios.get(config.url + '/seriesId/' + seriesId[id] + '/getProductsBySeries')
         .then((res) => {
-          console.log(res.data)
+          // console.log(res.data)
           for (let i in res.data) {
             if (res.data[i].type === '听花') {
               // 听花

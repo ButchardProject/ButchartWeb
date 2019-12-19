@@ -56,7 +56,7 @@ export default {
       let self = this
       axios.get(config.url + '/user/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/getAddress?access_token=' + sessionStorage.getItem('token'))
         .then((res) => {
-          console.log(res)
+          // console.log(res)
           // 获取的数据量先存起来
           self.num = res.data.length
           if (self.name.length) {
@@ -124,7 +124,6 @@ export default {
           // 如果当前数组中存在的元素不等于现在推进来的，就是直接剔除
           if (this.current[i] !== index) {
             this.current.splice(i, 1)
-            console.log(this.current)
           }
         }
       } else { // 检索元素已经存在，为了控制当前button的class

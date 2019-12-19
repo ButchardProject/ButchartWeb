@@ -69,7 +69,7 @@ export default {
         'Content-Type': 'application/json'
       }
     }).then(function (res) {
-      console.log(res.data)
+      // console.log(res.data)
       for (let index in res.data) {
         // 将当前除自提以外的配送方式加入
         if (res.data[index].deliveryMethod !== '自提') {
@@ -126,7 +126,7 @@ export default {
       if (JSON.parse(sessionStorage.getItem('type'))) {
         let type = JSON.parse(sessionStorage.getItem('type'))
         if (type === '听花') {
-          this.startDate = new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 1)
+          this.startDate = new Date(Date.parse(new Date()))
         } else {
           this.startDate = new Date(Date.parse(new Date()) + 1000 * 60 * 60 * 24 * 3)
         }

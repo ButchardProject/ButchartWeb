@@ -113,7 +113,7 @@ export default {
           })
           axios.put(config.url + '/customer/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/transactionId/' + JSON.parse(sessionStorage.getItem('comment')) + '/afterSales?access_token=' + sessionStorage.getItem('token'), info)
             .then(function (res) {
-              console.log(res)
+              // console.log(res)
               if (res.status === 200) {
                 MessageBox.alert('操作成功').then(action => {
                   that.$router.push({
@@ -144,7 +144,7 @@ export default {
             })
             axios.put(config.url + '/customer/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/transaction/' + JSON.parse(sessionStorage.getItem('comment')) + '/afterSales?access_token=' + sessionStorage.getItem('token'), info)
               .then(function (res) {
-                console.log(res)
+                // console.log(res)
                 if (res.status === 200) {
                   MessageBox.alert('操作成功').then(action => {
                     that.$router.push({
@@ -176,7 +176,7 @@ export default {
             })
             axios.put(config.url + '/customer/' + JSON.parse(sessionStorage.getItem('userInfo')).phone + '/transaction/' + JSON.parse(sessionStorage.getItem('comment')) + '/afterSales?access_token=' + sessionStorage.getItem('token'), info)
               .then(function (res) {
-                console.log(res)
+                // console.log(res)
                 if (res.status === 200) {
                   MessageBox.alert('操作成功').then(action => {
                     that.$router.push({

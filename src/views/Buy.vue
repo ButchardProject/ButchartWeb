@@ -166,7 +166,7 @@ export default {
         JSON.parse(sessionStorage.getItem('currentFlowerInfo')).productId +
         '/addToShoppingList?quantity=' + parseInt(this.value) + '&access_token=' + sessionStorage.getItem('token'))
           .then(function (res) {
-            console.log(res)
+            // console.log(res)
             if (res.status === 200) {
               that.$store.dispatch('getAddUnread', that.badge)
               sessionStorage.setItem('unread', that.badge)

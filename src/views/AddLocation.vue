@@ -207,7 +207,7 @@ export default {
               'Content-Type': 'application/json'
             }
           }).then(function (res) {
-            console.log(res)
+            // console.log(res)
             self.$router.push('location')
           }).catch(function (error) {
             console.log(error)
